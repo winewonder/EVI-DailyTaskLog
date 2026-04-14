@@ -23,7 +23,8 @@
       "Bash(curl -s \"http://localhost:5050/api/weekly-summary?year=2026&week=15\")",
       "Bash(grep -ri \"api_key\\\\|anthropic\" /Users/spatel/Documents/EVI/Tools/DailyTasks/*.py)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)"
     ]
   }
 }
