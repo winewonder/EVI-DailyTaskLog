@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 create_daily_log.py)",
+      "Bash(open /Users/spatel/Documents/EVI/Tools/DailyTasks/DailyTaskLog.xlsx)",
+      "Bash(python3 task_manager.py rebuild_excel)",
+      "Bash(pip3 install:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5050)",
+      "Bash(open http://localhost:5050)",
+      "Bash(lsof -ti:5050)",
+      "Bash(xargs kill:*)",
+      "Bash(python3 -c \":*)",
+      "Bash(echo $ANTHROPIC_API_KEY)",
+      "Bash(curl -s \"http://localhost:5050/summary?w=14&y=2026&mode=auto\")",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s \"http://localhost:5050/summary?w=14&y=2026&mode=ai\")",
+      "Skill(claude-api)",
+      "Skill(claude-api:*)",
+      "Bash(python3 daily_log_app.py)",
+      "Bash(python3 -c \"import flask; print\\(flask.__version__\\)\")",
+      "Bash(python3 web_app.py)",
+      "Bash(python3 -c \"import anthropic; print\\('ok'\\)\")",
+      "Bash(curl -s \"http://localhost:5050/api/weekly-summary?year=2026&week=15\")",
+      "Bash(grep -ri \"api_key\\\\|anthropic\" /Users/spatel/Documents/EVI/Tools/DailyTasks/*.py)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
