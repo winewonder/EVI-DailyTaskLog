@@ -531,6 +531,41 @@ HTML_PAGE = r"""
   .task-desc { flex:1; color:var(--text); }
   .task-info { color:var(--text); opacity:0.6; font-size:12px; font-style:italic; max-width:200px; }
 
+  /* View Tabs */
+  .view-tabs { display:flex; gap:0; margin-bottom:0; }
+  .view-tab { padding:10px 24px; font-size:14px; font-weight:bold; cursor:pointer;
+              border:2px solid var(--blue); border-bottom:none; border-radius:8px 8px 0 0;
+              background:var(--pale); color:var(--text); transition:all 0.15s; margin-right:2px; }
+  .view-tab:hover { background:var(--ltblue); }
+  .view-tab.active { background:var(--blue); color:#fff; }
+  .tab-content { border:2px solid var(--blue); border-radius:0 8px 8px 8px; padding:0;
+                 background:var(--card-bg); }
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+  .week-header { background:var(--navy); color:#fff; padding:12px 20px; display:flex;
+                 justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+  .week-header h3 { font-size:16px; letter-spacing:0.5px; }
+  .week-day-cards { padding:16px; display:flex; flex-direction:column; gap:12px; }
+  .day-card { border:1px solid var(--border-col); border-radius:6px; overflow:hidden; }
+  .day-card-header { background:var(--blue); color:#fff; padding:8px 16px; font-weight:bold;
+                     font-size:14px; display:flex; justify-content:space-between; align-items:center; }
+  .day-card-body { background:var(--card-bg); }
+  .day-card-row { display:flex; padding:8px 16px; font-size:13px; border-bottom:1px solid var(--border-col);
+                  align-items:center; gap:10px; }
+  .day-card-row:last-child { border-bottom:none; }
+  .day-card-row:nth-child(even) { background:var(--pale); }
+  .day-card-num { background:var(--navy); color:#fff; padding:2px 8px; border-radius:3px;
+                  font-size:11px; font-weight:bold; min-width:30px; text-align:center; }
+  .day-card-loc { background:var(--orange); color:#fff; padding:2px 10px; border-radius:3px;
+                  font-size:12px; font-weight:bold; white-space:nowrap; }
+  .day-card-desc { flex:1; color:var(--text); }
+  .day-card-info { color:var(--text); opacity:0.6; font-size:12px; font-style:italic; max-width:180px; }
+  .day-card-actions { display:flex; gap:4px; }
+  .week-empty { text-align:center; padding:40px; color:var(--text); opacity:0.5; font-size:16px; }
+  .week-stats { display:flex; gap:8px; }
+  .week-stat-badge { background:rgba(255,255,255,0.2); padding:3px 10px; border-radius:12px;
+                     font-size:12px; font-weight:bold; }
+
   @media print {
     body * { visibility: hidden; }
     .modal, .modal * { visibility: visible; }
@@ -580,6 +615,8 @@ HTML_PAGE = r"""
           <input type="radio" name="location" id="loc-DH4" value="DH4"><label for="loc-DH4">DH4</label>
           <input type="radio" name="location" id="loc-DH5" value="DH5"><label for="loc-DH5">DH5</label>
           <input type="radio" name="location" id="loc-DH6" value="DH6"><label for="loc-DH6">DH6</label>
+          <input type="radio" name="location" id="loc-Other" value="Other"><label for="loc-Other">Others</label>
+          <input type="text" id="locOther" placeholder="Enter location..." style="width:140px; padding:6px 8px; font-size:13px; border:1px solid var(--input-border); border-radius:4px; background:var(--input-bg); color:var(--text); display:none;">
         </div>
       </div>
 
@@ -622,17 +659,36 @@ HTML_PAGE = r"""
     <span class="record-count" id="recordCount"></span>
   </div>
 
-  <!-- TABLE -->
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>#</th><th>Date</th><th>Day</th><th>Description</th>
-          <th>Location</th><th>DC Code</th><th>Add. Info</th><th>Saved At</th><th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="taskBody"></tbody>
-    </table>
+  <!-- TABS -->
+  <div class="view-tabs">
+    <div class="view-tab active" onclick="switchTab('all')">All Records</div>
+    <div class="view-tab" onclick="switchTab('week')">Current Week</div>
+  </div>
+  <div class="tab-content">
+    <!-- All Records Tab -->
+    <div class="tab-panel active" id="tabAll">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Date</th><th>Day</th><th>Description</th>
+              <th>Location</th><th>DC Code</th><th>Add. Info</th><th>Saved At</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="taskBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Current Week Tab -->
+    <div class="tab-panel" id="tabWeek">
+      <div class="week-header" id="cwHeader">
+        <h3 id="cwTitle">Current Week</h3>
+        <div class="week-stats" id="cwStats"></div>
+      </div>
+      <div class="week-day-cards" id="cwBody">
+        <div class="week-empty">Loading...</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -673,6 +729,8 @@ HTML_PAGE = r"""
           <input type="radio" name="editLocation" id="edit-loc-DH4" value="DH4"><label for="edit-loc-DH4">DH4</label>
           <input type="radio" name="editLocation" id="edit-loc-DH5" value="DH5"><label for="edit-loc-DH5">DH5</label>
           <input type="radio" name="editLocation" id="edit-loc-DH6" value="DH6"><label for="edit-loc-DH6">DH6</label>
+          <input type="radio" name="editLocation" id="edit-loc-Other" value="Other"><label for="edit-loc-Other">Others</label>
+          <input type="text" id="editLocOther" placeholder="Enter location..." style="width:140px; padding:6px 8px; font-size:13px; border:1px solid var(--input-border); border-radius:4px; background:var(--input-bg); color:var(--text); display:none;">
         </div>
       </div>
       <div class="form-row">
@@ -737,8 +795,27 @@ function getWeekNumber(d) {
 
 function getLocation() {
   const checked = document.querySelector('input[name="location"]:checked');
+  if (checked && checked.value === "Other") return $("locOther").value.trim() || "Other";
   return checked ? checked.value : "DH1";
 }
+
+function getEditLocation() {
+  const checked = document.querySelector('input[name="editLocation"]:checked');
+  if (checked && checked.value === "Other") return $("editLocOther").value.trim() || "Other";
+  return checked ? checked.value : "DH1";
+}
+
+// Toggle "Others" text input visibility
+function setupOtherToggle(radioName, inputId) {
+  document.querySelectorAll('input[name="' + radioName + '"]').forEach(r => {
+    r.addEventListener("change", () => {
+      $(inputId).style.display = r.value === "Other" && r.checked ? "inline-block" : "none";
+      if (r.value === "Other" && r.checked) $(inputId).focus();
+    });
+  });
+}
+setupOtherToggle("location", "locOther");
+setupOtherToggle("editLocation", "editLocOther");
 
 // ── Save ──────────────────────────────────────────
 async function saveEntry() {
@@ -761,7 +838,7 @@ async function saveEntry() {
     toast(data.message, "success");
     setStatus("SAVED  Record #" + data.id);
     clearForm();
-    recallAll();
+    refreshActiveTab();
   } else {
     toast(data.error || "Save failed", "error");
   }
@@ -773,6 +850,8 @@ function clearForm() {
   $("addInfo").value = "";
   $("dcCode").value = "EVI01";
   document.getElementById("loc-DH1").checked = true;
+  $("locOther").value = "";
+  $("locOther").style.display = "none";
   const today = new Date().toISOString().slice(0,10);
   $("entryDate").value = today;
   updateDateDisplay(today);
@@ -785,7 +864,7 @@ async function deleteRecord(id) {
   const res = await fetch("/api/delete/" + id, { method: "DELETE" });
   if (res.ok) {
     toast("Record #" + id + " deleted.", "success");
-    recallAll();
+    refreshActiveTab();
   }
 }
 
@@ -801,8 +880,16 @@ async function editRecord(id) {
   $("editAddInfo").value = r.add_info || "";
   // Set location radio
   const loc = r.location || "DH1";
-  const radio = document.getElementById("edit-loc-" + loc);
-  if (radio) radio.checked = true;
+  const knownLocs = ["DH1","DH2","DH3","DH4","DH5","DH6"];
+  if (knownLocs.includes(loc)) {
+    document.getElementById("edit-loc-" + loc).checked = true;
+    $("editLocOther").style.display = "none";
+    $("editLocOther").value = "";
+  } else {
+    document.getElementById("edit-loc-Other").checked = true;
+    $("editLocOther").style.display = "inline-block";
+    $("editLocOther").value = loc;
+  }
   $("editTitle").textContent = "EDIT RECORD #" + r.id;
   $("editModal").classList.add("open");
 }
@@ -811,11 +898,10 @@ async function submitEdit() {
   const id = $("editId").value;
   const desc = $("editDescription").value.trim();
   if (!desc) { toast("Description is required.", "error"); $("editDescription").focus(); return; }
-  const locRadio = document.querySelector('input[name="editLocation"]:checked');
   const body = {
     entry_date: $("editDate").value,
     description: desc,
-    location: locRadio ? locRadio.value : "DH1",
+    location: getEditLocation(),
     dc_code: $("editDcCode").value.trim() || "EVI01",
     add_info: $("editAddInfo").value.trim(),
   };
@@ -826,7 +912,7 @@ async function submitEdit() {
   if (res.ok) {
     toast(data.message, "success");
     closeEdit();
-    recallAll();
+    refreshActiveTab();
   } else {
     toast(data.error || "Update failed", "error");
   }
@@ -996,6 +1082,77 @@ document.querySelectorAll(".theme-dot").forEach(dot => {
 // Load saved theme
 const savedTheme = localStorage.getItem("evi-theme");
 if (savedTheme) setTheme(savedTheme);
+
+// ── Refresh active tab ───────────────────────────
+function refreshActiveTab() {
+  if (activeTab === "week") loadCurrentWeek();
+  else recallAll();
+}
+
+// ── Tab Switching ────────────────────────────────
+let activeTab = "all";
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll(".view-tab").forEach((t, i) => {
+    t.classList.toggle("active", (i === 0 && tab === "all") || (i === 1 && tab === "week"));
+  });
+  $("tabAll").classList.toggle("active", tab === "all");
+  $("tabWeek").classList.toggle("active", tab === "week");
+  if (tab === "week") loadCurrentWeek();
+}
+
+async function loadCurrentWeek() {
+  const yr = $("yearNum").value;
+  const wk = $("weekNum").value;
+  const rows = await fetchTasks("week", { year: yr, week: wk });
+
+  $("cwTitle").textContent = "Week " + wk + " — " + yr;
+  $("cwStats").innerHTML =
+    '<span class="week-stat-badge">' + rows.length + ' task(s)</span>';
+
+  const body = $("cwBody");
+  if (rows.length === 0) {
+    body.innerHTML = '<div class="week-empty">No tasks recorded for this week.</div>';
+    $("recordCount").textContent = "0 record(s) — Week " + wk;
+    return;
+  }
+
+  // Group by day
+  const daysOrder = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  const byDay = {};
+  rows.forEach(r => {
+    const d = r.day_name;
+    if (!byDay[d]) byDay[d] = { date: r.entry_date, tasks: [] };
+    byDay[d].tasks.push(r);
+  });
+
+  let html = "";
+  daysOrder.forEach(day => {
+    if (!byDay[day]) return;
+    const g = byDay[day];
+    html += '<div class="day-card">';
+    html += '<div class="day-card-header"><span>' + esc(day) + ' — ' + esc(g.date) + '</span>'
+          + '<span>' + g.tasks.length + ' task(s)</span></div>';
+    html += '<div class="day-card-body">';
+    g.tasks.forEach((t, i) => {
+      html += '<div class="day-card-row">';
+      html += '<span class="day-card-num">' + (i+1) + '</span>';
+      html += '<span class="day-card-loc">' + esc(t.location||"") + '</span>';
+      html += '<span class="day-card-desc">' + esc(t.description||"") + '</span>';
+      if (t.add_info) html += '<span class="day-card-info">' + esc(t.add_info) + '</span>';
+      html += '<span class="day-card-actions">'
+            + '<button class="act-btn act-edit" onclick="editRecord(' + t.id + ')">EDIT</button>'
+            + '<button class="act-btn act-del" onclick="deleteRecord(' + t.id + ')">DEL</button>'
+            + '</span>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+  });
+  body.innerHTML = html;
+  $("recordCount").textContent = rows.length + " record(s) — Week " + wk;
+  setStatus("Current week: Year " + yr + ", Week " + wk + " — " + rows.length + " found");
+}
 
 init();
 </script>
