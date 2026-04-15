@@ -303,17 +303,86 @@ HTML_PAGE = r"""
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
 <title>EVI Daily Task Log</title>
 <style>
-  :root {
+  /* ── THEMES ─────────────────────────────────────── */
+  :root, [data-theme="classic-blue"] {
     --navy: #1F3864; --blue: #2E75B6; --ltblue: #DEEAF1;
     --pale: #EBF3FB; --orange: #FF6600; --green: #27AE60;
     --red: #C0392B; --warn-bg: #FFF2CC; --green-bg: #E2EFDA;
+    --bg: #f4f6f9; --text: #333; --card-bg: #fff;
+    --input-bg: #EBF3FB; --input-border: #ccc;
+    --row-even: #DEEAF1; --row-odd: #fff; --row-hover: #d4e6f1;
+    --modal-bg: #fff; --border-col: #e0e0e0;
+    --gradient-start: #1F3864; --gradient-end: #2E75B6;
   }
+  [data-theme="dark"] {
+    --navy: #0d1b2a; --blue: #1b4965; --ltblue: #1e2d3d;
+    --pale: #162029; --orange: #e07020; --green: #2ecc71;
+    --red: #e74c3c; --warn-bg: #3a2e0a; --green-bg: #1a2e1a;
+    --bg: #0a0f14; --text: #d0d8e0; --card-bg: #111a24;
+    --input-bg: #162029; --input-border: #2a3a4a;
+    --row-even: #111a24; --row-odd: #0d1520; --row-hover: #1b2a3a;
+    --modal-bg: #111a24; --border-col: #1e2d3d;
+    --gradient-start: #0d1b2a; --gradient-end: #1b4965;
+  }
+  [data-theme="emerald"] {
+    --navy: #064e3b; --blue: #059669; --ltblue: #d1fae5;
+    --pale: #ecfdf5; --orange: #d97706; --green: #10b981;
+    --red: #dc2626; --warn-bg: #fef3c7; --green-bg: #d1fae5;
+    --bg: #f0fdf4; --text: #1e3a2f; --card-bg: #fff;
+    --input-bg: #ecfdf5; --input-border: #a7f3d0;
+    --row-even: #d1fae5; --row-odd: #fff; --row-hover: #a7f3d0;
+    --modal-bg: #fff; --border-col: #a7f3d0;
+    --gradient-start: #064e3b; --gradient-end: #059669;
+  }
+  [data-theme="sunset"] {
+    --navy: #7c2d12; --blue: #c2410c; --ltblue: #fed7aa;
+    --pale: #fff7ed; --orange: #ea580c; --green: #16a34a;
+    --red: #dc2626; --warn-bg: #fef9c3; --green-bg: #dcfce7;
+    --bg: #fef6ee; --text: #431407; --card-bg: #fff;
+    --input-bg: #fff7ed; --input-border: #fdba74;
+    --row-even: #fed7aa; --row-odd: #fff; --row-hover: #fdba74;
+    --modal-bg: #fff; --border-col: #fdba74;
+    --gradient-start: #7c2d12; --gradient-end: #c2410c;
+  }
+  [data-theme="purple"] {
+    --navy: #3b0764; --blue: #7c3aed; --ltblue: #ede9fe;
+    --pale: #f5f3ff; --orange: #f59e0b; --green: #22c55e;
+    --red: #ef4444; --warn-bg: #fef3c7; --green-bg: #dcfce7;
+    --bg: #f5f0ff; --text: #2e1065; --card-bg: #fff;
+    --input-bg: #f5f3ff; --input-border: #c4b5fd;
+    --row-even: #ede9fe; --row-odd: #fff; --row-hover: #ddd6fe;
+    --modal-bg: #fff; --border-col: #c4b5fd;
+    --gradient-start: #3b0764; --gradient-end: #7c3aed;
+  }
+  [data-theme="steel"] {
+    --navy: #1e293b; --blue: #475569; --ltblue: #e2e8f0;
+    --pale: #f1f5f9; --orange: #f97316; --green: #22c55e;
+    --red: #ef4444; --warn-bg: #fefce8; --green-bg: #dcfce7;
+    --bg: #f8fafc; --text: #1e293b; --card-bg: #fff;
+    --input-bg: #f1f5f9; --input-border: #cbd5e1;
+    --row-even: #e2e8f0; --row-odd: #fff; --row-hover: #cbd5e1;
+    --modal-bg: #fff; --border-col: #cbd5e1;
+    --gradient-start: #1e293b; --gradient-end: #475569;
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, sans-serif; background: #f4f6f9; color: #333; }
+  body { font-family: Arial, sans-serif; background: var(--bg); color: var(--text);
+         transition: background 0.3s, color 0.3s; }
 
   /* Banner */
   .banner { background: var(--navy); color: #fff; text-align: center;
-            padding: 14px 0; font-size: 22px; font-weight: bold; letter-spacing: 1px; }
+            padding: 14px 20px; font-size: 22px; font-weight: bold; letter-spacing: 1px;
+            display: flex; justify-content: center; align-items: center; position: relative; }
+  .banner-title { flex: 1; text-align: center; }
+
+  /* Theme switcher */
+  .theme-picker { position: absolute; right: 20px; display: flex; align-items: center; gap: 6px; }
+  .theme-picker span { font-size: 12px; opacity: 0.7; margin-right: 4px; }
+  .theme-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4);
+               cursor: pointer; transition: transform 0.15s, border-color 0.15s; }
+  .theme-dot:hover { transform: scale(1.2); border-color: #fff; }
+  .theme-dot.active { border-color: #fff; transform: scale(1.25);
+                      box-shadow: 0 0 8px rgba(255,255,255,0.5); }
 
   .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
 
@@ -325,7 +394,7 @@ HTML_PAGE = r"""
               border-radius: 8px; padding: 16px; min-width: 280px; }
   .cal-card h3 { color: var(--navy); margin-bottom: 10px; text-align: center; }
   input[type="date"] { width: 100%; padding: 10px; font-size: 16px; border: 2px solid var(--blue);
-                       border-radius: 6px; background: #fff; color: var(--navy); }
+                       border-radius: 6px; background: var(--card-bg); color: var(--navy); }
   .date-display { display: flex; gap: 8px; margin-top: 10px; }
   .date-display .date-val { background: var(--orange); color: #fff; padding: 6px 14px;
                              border-radius: 4px; font-weight: bold; font-size: 14px; }
@@ -333,7 +402,7 @@ HTML_PAGE = r"""
                              border-radius: 4px; font-weight: bold; font-size: 14px; flex: 1; text-align: center; }
 
   /* Details card */
-  .details-card { flex: 1; background: #fff; border: 2px solid var(--blue);
+  .details-card { flex: 1; background: var(--card-bg); border: 2px solid var(--blue);
                   border-radius: 8px; padding: 16px; min-width: 400px; }
   .details-card h3 { color: var(--navy); margin-bottom: 12px; }
 
@@ -342,13 +411,13 @@ HTML_PAGE = r"""
                     border-radius: 4px; font-weight: bold; font-size: 13px;
                     min-width: 110px; text-align: center; white-space: nowrap; }
   .form-row input[type="text"], .form-row textarea {
-    flex: 1; padding: 8px 10px; font-size: 14px; border: 1px solid #ccc;
-    border-radius: 4px; background: var(--pale); color: var(--navy); font-family: Arial; }
+    flex: 1; padding: 8px 10px; font-size: 14px; border: 1px solid var(--input-border);
+    border-radius: 4px; background: var(--input-bg); color: var(--text); font-family: Arial; }
   .form-row textarea { resize: vertical; min-height: 50px; }
 
   /* Radio group */
   .radio-group { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; align-items: center; }
-  .radio-group label { background: transparent; color: var(--navy); min-width: auto;
+  .radio-group label { background: var(--card-bg); color: var(--text); min-width: auto;
                        padding: 6px 10px; border: 2px solid var(--blue); border-radius: 4px;
                        cursor: pointer; font-size: 13px; transition: all 0.15s; }
   .radio-group input[type="radio"] { display: none; }
@@ -374,7 +443,8 @@ HTML_PAGE = r"""
   .recall-label { background: var(--navy); color: #fff; padding: 6px 14px;
                   border-radius: 4px; font-weight: bold; font-size: 13px; }
   .recall-bar input[type="number"] { width: 70px; padding: 6px; font-size: 14px;
-                                     border: 1px solid #ccc; border-radius: 4px; }
+                                     border: 1px solid var(--input-border); border-radius: 4px;
+                                     background: var(--input-bg); color: var(--text); }
   .record-count { background: var(--green-bg); color: #375623; padding: 6px 14px;
                   border-radius: 4px; font-weight: bold; font-size: 13px; margin-left: auto; }
 
@@ -383,10 +453,10 @@ HTML_PAGE = r"""
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead th { background: var(--blue); color: #fff; padding: 10px 8px;
              text-align: center; font-weight: bold; position: sticky; top: 0; }
-  tbody td { padding: 8px; border-bottom: 1px solid #e0e0e0; }
-  tbody tr:nth-child(even) { background: var(--ltblue); }
-  tbody tr:nth-child(odd)  { background: #fff; }
-  tbody tr:hover { background: #d4e6f1; }
+  tbody td { padding: 8px; border-bottom: 1px solid var(--border-col); }
+  tbody tr:nth-child(even) { background: var(--row-even); }
+  tbody tr:nth-child(odd)  { background: var(--row-odd); }
+  tbody tr:hover { background: var(--row-hover); }
   td.desc-col, td.info-col { text-align: left; max-width: 300px; word-wrap: break-word; }
   td.center { text-align: center; }
   td.actions { text-align: center; white-space: nowrap; }
@@ -409,7 +479,7 @@ HTML_PAGE = r"""
                    z-index:10000; justify-content:center; align-items:flex-start;
                    padding:30px; overflow-y:auto; }
   .modal-overlay.open { display:flex; }
-  .modal { background:#fff; border-radius:10px; max-width:900px; width:100%;
+  .modal { background:var(--modal-bg); border-radius:10px; max-width:900px; width:100%;
            box-shadow: 0 8px 32px rgba(0,0,0,0.25); overflow:hidden; }
   .modal-header { background:var(--navy); color:#fff; padding:16px 24px;
                   display:flex; justify-content:space-between; align-items:center; }
@@ -427,7 +497,7 @@ HTML_PAGE = r"""
   .stat-card .stat-num { font-size:28px; font-weight:bold; color:var(--navy); }
   .stat-card .stat-label { font-size:12px; color:var(--blue); font-weight:bold; margin-top:4px; }
 
-  .ai-summary-box { background: linear-gradient(135deg, #1F3864 0%, #2E75B6 100%);
+  .ai-summary-box { background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
                      color: #fff; padding: 20px 24px; border-radius: 8px; margin-bottom: 20px;
                      line-height: 1.7; font-size: 14px; position: relative; }
   .ai-summary-box::before { content: "AI SUMMARY"; position: absolute; top: -10px; left: 16px;
@@ -448,8 +518,9 @@ HTML_PAGE = r"""
   .day-section { margin-bottom:16px; }
   .day-header { background:var(--blue); color:#fff; padding:8px 16px; border-radius:6px 6px 0 0;
                 font-weight:bold; font-size:14px; display:flex; justify-content:space-between; }
-  .day-tasks { border:1px solid #ddd; border-top:none; border-radius:0 0 6px 6px; }
-  .day-task-row { display:flex; padding:8px 16px; font-size:13px; border-bottom:1px solid #eee;
+  .day-tasks { border:1px solid var(--border-col); border-top:none; border-radius:0 0 6px 6px;
+               background: var(--card-bg); }
+  .day-task-row { display:flex; padding:8px 16px; font-size:13px; border-bottom:1px solid var(--border-col);
                   align-items:flex-start; gap:12px; }
   .day-task-row:last-child { border-bottom:none; }
   .day-task-row:nth-child(even) { background:var(--pale); }
@@ -457,8 +528,8 @@ HTML_PAGE = r"""
               font-size:12px; font-weight:bold; white-space:nowrap; }
   .task-dc { background:var(--orange); color:#fff; padding:2px 8px; border-radius:3px;
              font-size:11px; font-weight:bold; white-space:nowrap; }
-  .task-desc { flex:1; color:#333; }
-  .task-info { color:#888; font-size:12px; font-style:italic; max-width:200px; }
+  .task-desc { flex:1; color:var(--text); }
+  .task-info { color:var(--text); opacity:0.6; font-size:12px; font-style:italic; max-width:200px; }
 
   @media print {
     body * { visibility: hidden; }
@@ -470,7 +541,18 @@ HTML_PAGE = r"""
 </head>
 <body>
 
-<div class="banner">EVI DAILY TASK LOG &mdash; Datacenter EVI01</div>
+<div class="banner">
+  <span class="banner-title">EVI DAILY TASK LOG &mdash; Datacenter EVI01</span>
+  <div class="theme-picker">
+    <span>THEME</span>
+    <div class="theme-dot active" data-theme="classic-blue" style="background:linear-gradient(135deg,#1F3864,#2E75B6);" title="Classic Blue"></div>
+    <div class="theme-dot" data-theme="dark" style="background:linear-gradient(135deg,#0a0f14,#1b4965);" title="Dark"></div>
+    <div class="theme-dot" data-theme="emerald" style="background:linear-gradient(135deg,#064e3b,#059669);" title="Emerald"></div>
+    <div class="theme-dot" data-theme="sunset" style="background:linear-gradient(135deg,#7c2d12,#c2410c);" title="Sunset"></div>
+    <div class="theme-dot" data-theme="purple" style="background:linear-gradient(135deg,#3b0764,#7c3aed);" title="Purple"></div>
+    <div class="theme-dot" data-theme="steel" style="background:linear-gradient(135deg,#1e293b,#475569);" title="Steel"></div>
+  </div>
+</div>
 
 <div class="container">
   <!-- FORM SECTION -->
@@ -533,9 +615,9 @@ HTML_PAGE = r"""
     <button class="btn btn-blue" onclick="recallByWeek()">By This Week</button>
     <button class="btn btn-blue" onclick="recallAll()">All Records</button>
     <button class="btn btn-save" onclick="showWeeklySummary()" style="margin-left:4px;">WEEKLY SUMMARY</button>
-    <span style="margin-left:16px; font-weight:bold; color:var(--navy);">Week #:</span>
+    <span style="margin-left:16px; font-weight:bold; color:var(--text);">Week #:</span>
     <input type="number" id="weekNum" min="1" max="53">
-    <span style="font-weight:bold; color:var(--navy);">Year:</span>
+    <span style="font-weight:bold; color:var(--text);">Year:</span>
     <input type="number" id="yearNum" min="2020" max="2035">
     <span class="record-count" id="recordCount"></span>
   </div>
@@ -896,6 +978,24 @@ document.addEventListener("click", function(e) {
   if (e.target.id === "summaryModal") closeSummary();
   if (e.target.id === "editModal") closeEdit();
 });
+
+// ── Theme Switcher ────────────────────────────────
+function setTheme(name) {
+  document.documentElement.setAttribute("data-theme", name);
+  document.querySelectorAll(".theme-dot").forEach(d => d.classList.remove("active"));
+  const active = document.querySelector('.theme-dot[data-theme="'+name+'"]');
+  if (active) active.classList.add("active");
+  localStorage.setItem("evi-theme", name);
+}
+
+// Theme dot click handlers
+document.querySelectorAll(".theme-dot").forEach(dot => {
+  dot.addEventListener("click", () => setTheme(dot.dataset.theme));
+});
+
+// Load saved theme
+const savedTheme = localStorage.getItem("evi-theme");
+if (savedTheme) setTheme(savedTheme);
 
 init();
 </script>

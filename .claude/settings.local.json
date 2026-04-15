@@ -24,7 +24,21 @@
       "Bash(grep -ri \"api_key\\\\|anthropic\" /Users/spatel/Documents/EVI/Tools/DailyTasks/*.py)",
       "Bash(git init:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m ':*)"
+      "Bash(git commit -m ':*)",
+      "Bash(curl -s \"http://localhost:5050/api/tasks?mode=all\")",
+      "Bash(sqlite3 /Users/spatel/Documents/EVI/Tools/DailyTasks/tasks.db \"SELECT COUNT\\(*\\) FROM tasks;\")",
+      "Bash(sqlite3 /Users/spatel/Documents/EVI/Tools/DailyTasks/tasks.db \"SELECT * FROM tasks ORDER BY id;\")",
+      "Bash(sqlite3 /Users/spatel/Documents/EVI/Tools/DailyTasks/worklog.db \".tables\")",
+      "Bash(sqlite3 /Users/spatel/Documents/EVI/Tools/DailyTasks/worklog.db \"SELECT COUNT\\(*\\) FROM tasks;\")",
+      "Bash(sqlite3 /Users/spatel/Documents/EVI/Tools/DailyTasks/worklog.db \"SELECT * FROM tasks ORDER BY id;\")",
+      "Bash(sqlite3 /Users/spatel/Documents/EVI/Tools/DailyTasks/worklog.db \".schema\")",
+      "Bash(sqlite3 /Users/spatel/Documents/EVI/Tools/DailyTasks/worklog.db \"SELECT COUNT\\(*\\) FROM worklog;\")",
+      "Bash(sqlite3 /Users/spatel/Documents/EVI/Tools/DailyTasks/worklog.db \"SELECT * FROM worklog LIMIT 5;\")",
+      "Bash(sqlite3 /Users/spatel/Documents/EVI/Tools/DailyTasks/worklog.db \"SELECT * FROM worklog ORDER BY id;\")",
+      "Bash(sqlite3 /Users/spatel/Documents/EVI/Tools/DailyTasks/tasks.db \"ATTACH '/Users/spatel/Documents/EVI/Tools/DailyTasks/worklog.db' AS wl; INSERT INTO tasks \\(entry_date, day_name, description, location, dc_code, add_info, week_number, year, saved_at\\) SELECT entry_date, day_name, description, location, dc_code, add_info, week_number, year, saved_at FROM wl.worklog; DETACH wl;\")",
+      "Bash(python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); print\\(f'{len\\(data\\)} records:'\\); [print\\(f'  #{r[\\\\\"id\\\\\"]} | {r[\\\\\"entry_date\\\\\"]} | {r[\\\\\"location\\\\\"]} | {r[\\\\\"description\\\\\"][:60]}'\\) for r in data]\")",
+      "Bash(sqlite3 /Users/spatel/Documents/EVI/Tools/DailyTasks/tasks.db \"SELECT id, entry_date, saved_at, description FROM tasks ORDER BY saved_at ASC;\")",
+      "Bash(sqlite3 /Users/spatel/Documents/EVI/Tools/DailyTasks/tasks.db)"
     ]
   }
 }
