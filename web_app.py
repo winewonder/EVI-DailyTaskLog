@@ -566,6 +566,40 @@ HTML_PAGE = r"""
   .week-stat-badge { background:rgba(255,255,255,0.2); padding:3px 10px; border-radius:12px;
                      font-size:12px; font-weight:bold; }
 
+  /* Search bar */
+  .search-bar { display:flex; align-items:center; gap:8px; padding:10px 16px;
+                background:var(--pale); border-bottom:1px solid var(--border-col); }
+  .search-bar input { flex:1; padding:8px 12px; font-size:14px; border:1px solid var(--input-border);
+                      border-radius:4px; background:var(--input-bg); color:var(--text); }
+  .search-bar input::placeholder { color:var(--text); opacity:0.4; }
+  .search-bar .search-icon { color:var(--blue); font-weight:bold; font-size:16px; }
+  .search-bar .search-count { font-size:12px; color:var(--text); opacity:0.6; font-weight:bold; }
+
+  /* Stats dashboard */
+  .stats-dash { display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+  .mini-stat { display:flex; align-items:center; gap:8px; background:var(--card-bg);
+               border:2px solid var(--blue); border-radius:8px; padding:8px 16px; }
+  .mini-stat .mini-num { font-size:22px; font-weight:bold; color:var(--navy); }
+  .mini-stat .mini-label { font-size:11px; font-weight:bold; color:var(--blue);
+                           text-transform:uppercase; line-height:1.2; }
+  .mini-stat .mini-sub { font-size:10px; color:var(--text); opacity:0.5; }
+
+  /* DUP button */
+  .act-dup { background:var(--orange); }
+
+  /* Export button */
+  .btn-export { background:var(--navy); }
+
+  /* Version label */
+  .version-label { position:fixed; bottom:10px; left:14px; font-size:11px; font-weight:bold;
+                   color:var(--text); opacity:0.35; letter-spacing:0.5px; z-index:100;
+                   pointer-events:none; }
+
+  /* Keyboard hint */
+  .kbd-hint { font-size:11px; color:var(--text); opacity:0.4; margin-left:4px; }
+  kbd { background:var(--pale); border:1px solid var(--input-border); border-radius:3px;
+        padding:1px 5px; font-size:10px; font-family:monospace; }
+
   @media print {
     body * { visibility: hidden; }
     .modal, .modal * { visibility: visible; }
@@ -636,9 +670,25 @@ HTML_PAGE = r"""
       </div>
 
       <div class="btn-row">
-        <button class="btn btn-save" onclick="saveEntry()">SAVE ENTRY</button>
+        <button class="btn btn-save" onclick="saveEntry()">SAVE ENTRY <span class="kbd-hint"><kbd>Ctrl</kbd>+<kbd>S</kbd></span></button>
         <button class="btn btn-clear" onclick="clearForm()">CLEAR FORM</button>
       </div>
+    </div>
+  </div>
+
+  <!-- STATS DASHBOARD -->
+  <div class="stats-dash" id="statsDash">
+    <div class="mini-stat">
+      <span class="mini-num" id="statToday">-</span>
+      <span><span class="mini-label">Today</span><br><span class="mini-sub" id="statTodayDate"></span></span>
+    </div>
+    <div class="mini-stat">
+      <span class="mini-num" id="statWeek">-</span>
+      <span><span class="mini-label">This Week</span><br><span class="mini-sub" id="statWeekLabel"></span></span>
+    </div>
+    <div class="mini-stat">
+      <span class="mini-num" id="statTotal">-</span>
+      <span><span class="mini-label">All Time</span><br><span class="mini-sub">total records</span></span>
     </div>
   </div>
 
@@ -652,6 +702,7 @@ HTML_PAGE = r"""
     <button class="btn btn-blue" onclick="recallByWeek()">By This Week</button>
     <button class="btn btn-blue" onclick="recallAll()">All Records</button>
     <button class="btn btn-save" onclick="showWeeklySummary()" style="margin-left:4px;">WEEKLY SUMMARY</button>
+    <button class="btn btn-export" onclick="exportCSV()" style="margin-left:4px;">EXPORT CSV</button>
     <span style="margin-left:16px; font-weight:bold; color:var(--text);">Week #:</span>
     <input type="number" id="weekNum" min="1" max="53">
     <span style="font-weight:bold; color:var(--text);">Year:</span>
@@ -667,6 +718,11 @@ HTML_PAGE = r"""
   <div class="tab-content">
     <!-- All Records Tab -->
     <div class="tab-panel active" id="tabAll">
+      <div class="search-bar">
+        <span class="search-icon">SEARCH</span>
+        <input type="text" id="searchInput" placeholder="Filter by description, location, date..." oninput="filterTable()">
+        <span class="search-count" id="searchCount"></span>
+      </div>
       <div class="table-wrap">
         <table>
           <thead>
@@ -753,6 +809,9 @@ HTML_PAGE = r"""
   </div>
 </div>
 
+<!-- Version Label -->
+<div class="version-label">Alpha v.1.0.0</div>
+
 <!-- Toast notification -->
 <div class="toast" id="toast"></div>
 
@@ -774,6 +833,7 @@ function init() {
 
   $("entryDate").addEventListener("change", () => updateDateDisplay($("entryDate").value));
   recallAll();
+  updateStats();
 }
 
 function updateDateDisplay(isoStr) {
@@ -788,9 +848,13 @@ function updateDateDisplay(isoStr) {
 }
 
 function getWeekNumber(d) {
-  const start = new Date(d.getFullYear(), 0, 1);
-  const diff = (d - start + (start.getTimezoneOffset() - d.getTimezoneOffset()) * 60000);
-  return Math.floor(diff / 604800000);
+  // Match Python strftime("%W") — Monday-based week numbering
+  const jan1 = new Date(d.getFullYear(), 0, 1);
+  const jan1Day = jan1.getDay(); // 0=Sun..6=Sat
+  const daysToFirstMon = jan1Day === 0 ? 1 : (jan1Day === 1 ? 0 : 8 - jan1Day);
+  const firstMonday = new Date(d.getFullYear(), 0, 1 + daysToFirstMon);
+  if (d < firstMonday) return 0;
+  return Math.floor((d - firstMonday) / 604800000) + 1;
 }
 
 function getLocation() {
@@ -969,6 +1033,7 @@ function renderTable(rows) {
       <td class="info-col">${esc(r.add_info||"")}</td>
       <td class="center">${r.saved_at||""}</td>
       <td class="actions">
+        <button class="act-btn act-dup" onclick="dupRecord(${r.id})">DUP</button>
         <button class="act-btn act-edit" onclick="editRecord(${r.id})">EDIT</button>
         <button class="act-btn act-del" onclick="deleteRecord(${r.id})">DEL</button>
       </td>`;
@@ -1087,6 +1152,7 @@ if (savedTheme) setTheme(savedTheme);
 function refreshActiveTab() {
   if (activeTab === "week") loadCurrentWeek();
   else recallAll();
+  updateStats();
 }
 
 // ── Tab Switching ────────────────────────────────
@@ -1153,6 +1219,137 @@ async function loadCurrentWeek() {
   $("recordCount").textContent = rows.length + " record(s) — Week " + wk;
   setStatus("Current week: Year " + yr + ", Week " + wk + " — " + rows.length + " found");
 }
+
+// ── Search / Filter ──────────────────────────────
+let allRows = []; // cache for filtering
+
+function filterTable() {
+  const q = $("searchInput").value.toLowerCase().trim();
+  const tbody = $("taskBody");
+  const rows = tbody.querySelectorAll("tr");
+  let visible = 0;
+  rows.forEach(tr => {
+    const text = tr.textContent.toLowerCase();
+    const show = !q || text.includes(q);
+    tr.style.display = show ? "" : "none";
+    if (show) visible++;
+  });
+  $("searchCount").textContent = q ? visible + " of " + rows.length + " shown" : "";
+}
+
+// ── Export CSV ───────────────────────────────────
+function exportCSV() {
+  const tbody = $("taskBody");
+  const rows = tbody.querySelectorAll("tr");
+  if (rows.length === 0) { toast("No records to export.", "error"); return; }
+
+  const headers = ["ID","Date","Day","Description","Location","DC Code","Add. Info","Saved At"];
+  let csv = headers.join(",") + "\n";
+
+  rows.forEach(tr => {
+    if (tr.style.display === "none") return; // skip filtered-out rows
+    const cells = tr.querySelectorAll("td");
+    const vals = [];
+    for (let i = 0; i < cells.length - 1; i++) { // skip Actions column
+      let v = cells[i].textContent.trim().replace(/"/g, '""');
+      vals.push('"' + v + '"');
+    }
+    csv += vals.join(",") + "\n";
+  });
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const d = new Date();
+  a.download = "EVI_Tasks_" + d.toISOString().slice(0,10) + ".csv";
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("CSV exported successfully!", "success");
+}
+
+// ── Quick Duplicate ──────────────────────────────
+async function dupRecord(id) {
+  const res = await fetch("/api/task/" + id);
+  if (!res.ok) { toast("Could not load record.", "error"); return; }
+  const r = await res.json();
+
+  // Pre-fill form with duplicated data
+  $("entryDate").value = new Date().toISOString().slice(0,10);
+  updateDateDisplay($("entryDate").value);
+  $("description").value = r.description || "";
+  $("addInfo").value = r.add_info || "";
+  $("dcCode").value = r.dc_code || "EVI01";
+
+  // Set location
+  const knownLocs = ["DH1","DH2","DH3","DH4","DH5","DH6"];
+  const loc = r.location || "DH1";
+  if (knownLocs.includes(loc)) {
+    document.getElementById("loc-" + loc).checked = true;
+    $("locOther").style.display = "none";
+    $("locOther").value = "";
+  } else {
+    document.getElementById("loc-Other").checked = true;
+    $("locOther").style.display = "inline-block";
+    $("locOther").value = loc;
+  }
+
+  toast("Form filled from record #" + id + " — edit and save as new.", "success");
+  $("description").focus();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ── Stats Dashboard ──────────────────────────────
+async function updateStats() {
+  const today = new Date().toISOString().slice(0,10);
+  const yr = new Date().getFullYear();
+  const wk = getWeekNumber(new Date());
+
+  // Fetch all three in parallel
+  const [todayRows, weekRows, allRowsData] = await Promise.all([
+    fetchTasks("date", { date: today }),
+    fetchTasks("week", { year: yr, week: wk }),
+    fetchTasks("all"),
+  ]);
+
+  $("statToday").textContent = todayRows.length;
+  $("statTodayDate").textContent = today;
+  $("statWeek").textContent = weekRows.length;
+  $("statWeekLabel").textContent = "Week " + wk;
+  $("statTotal").textContent = allRowsData.length;
+}
+
+// ── Keyboard Shortcuts ───────────────────────────
+document.addEventListener("keydown", function(e) {
+  // Ctrl+S / Cmd+S = Save entry
+  if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+    e.preventDefault();
+    // If edit modal is open, submit edit; otherwise save new entry
+    if ($("editModal").classList.contains("open")) {
+      submitEdit();
+    } else {
+      saveEntry();
+    }
+  }
+  // Escape = Close modals
+  if (e.key === "Escape") {
+    if ($("editModal").classList.contains("open")) closeEdit();
+    else if ($("summaryModal").classList.contains("open")) closeSummary();
+  }
+  // Ctrl+E = Export CSV
+  if ((e.ctrlKey || e.metaKey) && e.key === "e") {
+    e.preventDefault();
+    exportCSV();
+  }
+  // Ctrl+F = Focus search (when not in input)
+  if ((e.ctrlKey || e.metaKey) && e.key === "f" && activeTab === "all") {
+    if (document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+      e.preventDefault();
+      $("searchInput").focus();
+      $("searchInput").select();
+    }
+  }
+});
 
 init();
 </script>
