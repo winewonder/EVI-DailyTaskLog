@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+<title>EVI Daily Task Log</title>
+<style>
+  /* ── THEMES ─────────────────────────────────────── */
+  :root, [data-theme="classic-blue"] {
+    --navy: #1F3864; --blue: #2E75B6; --ltblue: #DEEAF1;
+    --pale: #EBF3FB; --orange: #FF6600; --green: #27AE60;
+    --red: #C0392B; --warn-bg: #FFF2CC; --green-bg: #E2EFDA;
+    --bg: #f4f6f9; --text: #333; --card-bg: #fff;
+    --input-bg: #EBF3FB; --input-border: #ccc;
+    --row-even: #DEEAF1; --row-odd: #fff; --row-hover: #d4e6f1;
+    --modal-bg: #fff; --border-col: #e0e0e0;
+    --gradient-start: #1F3864; --gradient-end: #2E75B6;
+  }
+  [data-theme="dark"] {
+    --navy: #0d1b2a; --blue: #1b4965; --ltblue: #1e2d3d;
+    --pale: #162029; --orange: #e07020; --green: #2ecc71;
+    --red: #e74c3c; --warn-bg: #3a2e0a; --green-bg: #1a2e1a;
+    --bg: #0a0f14; --text: #d0d8e0; --card-bg: #111a24;
+    --input-bg: #162029; --input-border: #2a3a4a;
+    --row-even: #111a24; --row-odd: #0d1520; --row-hover: #1b2a3a;
+    --modal-bg: #111a24; --border-col: #1e2d3d;
+    --gradient-start: #0d1b2a; --gradient-end: #1b4965;
+  }
+  [data-theme="emerald"] {
+    --navy: #064e3b; --blue: #059669; --ltblue: #d1fae5;
+    --pale: #ecfdf5; --orange: #d97706; --green: #10b981;
+    --red: #dc2626; --warn-bg: #fef3c7; --green-bg: #d1fae5;
+    --bg: #f0fdf4; --text: #1e3a2f; --card-bg: #fff;
+    --input-bg: #ecfdf5; --input-border: #a7f3d0;
+    --row-even: #d1fae5; --row-odd: #fff; --row-hover: #a7f3d0;
+    --modal-bg: #fff; --border-col: #a7f3d0;
+    --gradient-start: #064e3b; --gradient-end: #059669;
+  }
+  [data-theme="sunset"] {
+    --navy: #7c2d12; --blue: #c2410c; --ltblue: #fed7aa;
+    --pale: #fff7ed; --orange: #ea580c; --green: #16a34a;
+    --red: #dc2626; --warn-bg: #fef9c3; --green-bg: #dcfce7;
+    --bg: #fef6ee; --text: #431407; --card-bg: #fff;
+    --input-bg: #fff7ed; --input-border: #fdba74;
+    --row-even: #fed7aa; --row-odd: #fff; --row-hover: #fdba74;
+    --modal-bg: #fff; --border-col: #fdba74;
+    --gradient-start: #7c2d12; --gradient-end: #c2410c;
+  }
+  [data-theme="purple"] {
+    --navy: #3b0764; --blue: #7c3aed; --ltblue: #ede9fe;
+    --pale: #f5f3ff; --orange: #f59e0b; --green: #22c55e;
+    --red: #ef4444; --warn-bg: #fef3c7; --green-bg: #dcfce7;
+    --bg: #f5f0ff; --text: #2e1065; --card-bg: #fff;
+    --input-bg: #f5f3ff; --input-border: #c4b5fd;
+    --row-even: #ede9fe; --row-odd: #fff; --row-hover: #ddd6fe;
+    --modal-bg: #fff; --border-col: #c4b5fd;
+    --gradient-start: #3b0764; --gradient-end: #7c3aed;
+  }
+  [data-theme="steel"] {
+    --navy: #1e293b; --blue: #475569; --ltblue: #e2e8f0;
+    --pale: #f1f5f9; --orange: #f97316; --green: #22c55e;
+    --red: #ef4444; --warn-bg: #fefce8; --green-bg: #dcfce7;
+    --bg: #f8fafc; --text: #1e293b; --card-bg: #fff;
+    --input-bg: #f1f5f9; --input-border: #cbd5e1;
+    --row-even: #e2e8f0; --row-odd: #fff; --row-hover: #cbd5e1;
+    --modal-bg: #fff; --border-col: #cbd5e1;
+    --gradient-start: #1e293b; --gradient-end: #475569;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: var(--bg); color: var(--text);
+         transition: background 0.3s, color 0.3s; }
+
+  .banner { background: var(--navy); color: #fff; text-align: center;
+            padding: 14px 20px; font-size: 22px; font-weight: bold; letter-spacing: 1px;
+            display: flex; justify-content: center; align-items: center; position: relative; }
+  .banner-title { flex: 1; text-align: center; }
+
+  .theme-picker { position: absolute; right: 20px; display: flex; align-items: center; gap: 6px; }
+  .theme-picker span { font-size: 12px; opacity: 0.7; margin-right: 4px; }
+  .theme-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4);
+               cursor: pointer; transition: transform 0.15s, border-color 0.15s; }
+  .theme-dot:hover { transform: scale(1.2); border-color: #fff; }
+  .theme-dot.active { border-color: #fff; transform: scale(1.25);
+                      box-shadow: 0 0 8px rgba(255,255,255,0.5); }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+
+  .form-section { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+
+  .cal-card { background: var(--ltblue); border: 2px solid var(--blue);
+              border-radius: 8px; padding: 16px; min-width: 280px; }
+  .cal-card h3 { color: var(--navy); margin-bottom: 10px; text-align: center; }
+  input[type="date"] { width: 100%; padding: 10px; font-size: 16px; border: 2px solid var(--blue);
+                       border-radius: 6px; background: var(--card-bg); color: var(--navy); }
+  .date-display { display: flex; gap: 8px; margin-top: 10px; }
+  .date-display .date-val { background: var(--orange); color: #fff; padding: 6px 14px;
+                             border-radius: 4px; font-weight: bold; font-size: 14px; }
+  .date-display .day-val  { background: var(--navy); color: #fff; padding: 6px 14px;
+                             border-radius: 4px; font-weight: bold; font-size: 14px; flex: 1; text-align: center; }
+
+  .details-card { flex: 1; background: var(--card-bg); border: 2px solid var(--blue);
+                  border-radius: 8px; padding: 16px; min-width: 400px; }
+  .details-card h3 { color: var(--navy); margin-bottom: 12px; }
+
+  .form-row { display: flex; align-items: flex-start; margin-bottom: 10px; gap: 8px; }
+  .form-row label { background: var(--blue); color: #fff; padding: 8px 12px;
+                    border-radius: 4px; font-weight: bold; font-size: 13px;
+                    min-width: 110px; text-align: center; white-space: nowrap; }
+  .form-row input[type="text"], .form-row textarea {
+    flex: 1; padding: 8px 10px; font-size: 14px; border: 1px solid var(--input-border);
+    border-radius: 4px; background: var(--input-bg); color: var(--text); font-family: Arial; }
+  .form-row textarea { resize: vertical; min-height: 50px; }
+
+  .radio-group { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; align-items: center; }
+  .radio-group label { background: var(--card-bg); color: var(--text); min-width: auto;
+                       padding: 6px 10px; border: 2px solid var(--blue); border-radius: 4px;
+                       cursor: pointer; font-size: 13px; transition: all 0.15s; }
+  .radio-group input[type="radio"] { display: none; }
+  .radio-group input[type="radio"]:checked + label {
+    background: var(--blue); color: #fff; }
+
+  .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .btn { padding: 10px 20px; font-size: 14px; font-weight: bold; color: #fff;
+         border: none; border-radius: 5px; cursor: pointer; transition: opacity 0.15s; }
+  .btn:hover { opacity: 0.85; }
+  .btn-save   { background: var(--green); }
+  .btn-clear  { background: var(--orange); }
+  .btn-delete { background: var(--red); }
+  .btn-blue   { background: var(--blue); }
+
+  .status-bar { background: var(--warn-bg); color: #7D6608; padding: 8px 14px;
+                border-radius: 4px; font-size: 13px; margin-bottom: 12px; }
+
+  .recall-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .recall-label { background: var(--navy); color: #fff; padding: 6px 14px;
+                  border-radius: 4px; font-weight: bold; font-size: 13px; }
+  .recall-bar input[type="number"] { width: 70px; padding: 6px; font-size: 14px;
+                                     border: 1px solid var(--input-border); border-radius: 4px;
+                                     background: var(--input-bg); color: var(--text); }
+  .record-count { background: var(--green-bg); color: #375623; padding: 6px 14px;
+                  border-radius: 4px; font-weight: bold; font-size: 13px; margin-left: auto; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { background: var(--blue); color: #fff; padding: 10px 8px;
+             text-align: center; font-weight: bold; position: sticky; top: 0; }
+  tbody td { padding: 8px; border-bottom: 1px solid var(--border-col); }
+  tbody tr:nth-child(even) { background: var(--row-even); }
+  tbody tr:nth-child(odd)  { background: var(--row-odd); }
+  tbody tr:hover { background: var(--row-hover); }
+  td.desc-col, td.info-col { text-align: left; max-width: 300px; word-wrap: break-word; }
+  td.center { text-align: center; }
+  td.actions { text-align: center; white-space: nowrap; }
+  .act-btn { padding: 4px 10px; font-size: 12px; font-weight: bold; color: #fff;
+             border: none; border-radius: 3px; cursor: pointer; margin: 0 2px; transition: opacity 0.15s; }
+  .act-btn:hover { opacity: 0.8; }
+  .act-edit { background: var(--blue); }
+  .act-del  { background: var(--red); }
+  .act-dup  { background: var(--orange); }
+
+  .toast { position: fixed; top: 20px; right: 20px; padding: 14px 24px;
+           border-radius: 6px; color: #fff; font-weight: bold; font-size: 14px;
+           z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  .toast-success { background: var(--green); }
+  .toast-error   { background: var(--red); }
+
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5);
+                   z-index:10000; justify-content:center; align-items:flex-start;
+                   padding:30px; overflow-y:auto; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:var(--modal-bg); border-radius:10px; max-width:900px; width:100%;
+           box-shadow: 0 8px 32px rgba(0,0,0,0.25); overflow:hidden; }
+  .modal-header { background:var(--navy); color:#fff; padding:16px 24px;
+                  display:flex; justify-content:space-between; align-items:center; }
+  .modal-header h2 { font-size:20px; letter-spacing:0.5px; }
+  .modal-close { background:none; border:none; color:#fff; font-size:28px;
+                 cursor:pointer; line-height:1; padding:0 4px; }
+  .modal-close:hover { color:var(--orange); }
+  .modal-body { padding:24px; }
+  .modal-actions { padding:0 24px 20px; display:flex; gap:10px; }
+
+  .summary-stats { display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+  .stat-card { flex:1; min-width:140px; background:var(--pale); border:2px solid var(--blue);
+               border-radius:8px; padding:14px; text-align:center; }
+  .stat-card .stat-num { font-size:28px; font-weight:bold; color:var(--navy); }
+  .stat-card .stat-label { font-size:12px; color:var(--blue); font-weight:bold; margin-top:4px; }
+
+  .ai-summary-box { background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+                     color: #fff; padding: 20px 24px; border-radius: 8px; margin-bottom: 20px;
+                     line-height: 1.7; font-size: 14px; position: relative; }
+  .ai-summary-box::before { content: "AI SUMMARY"; position: absolute; top: -10px; left: 16px;
+                             background: var(--orange); color: #fff; padding: 2px 12px;
+                             border-radius: 4px; font-size: 11px; font-weight: bold; letter-spacing: 1px; }
+
+  .loc-badges { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+  .loc-badge { padding:6px 16px; border-radius:20px; font-weight:bold; font-size:13px;
+               background:var(--ltblue); color:var(--navy); border:1px solid var(--blue); }
+  .loc-badge span { background:var(--blue); color:#fff; border-radius:10px;
+                    padding:2px 8px; margin-left:6px; font-size:12px; }
+
+  .day-section { margin-bottom:16px; }
+  .day-header { background:var(--blue); color:#fff; padding:8px 16px; border-radius:6px 6px 0 0;
+                font-weight:bold; font-size:14px; display:flex; justify-content:space-between; }
+  .day-tasks { border:1px solid var(--border-col); border-top:none; border-radius:0 0 6px 6px;
+               background: var(--card-bg); }
+  .day-task-row { display:flex; padding:8px 16px; font-size:13px; border-bottom:1px solid var(--border-col);
+                  align-items:flex-start; gap:12px; }
+  .day-task-row:last-child { border-bottom:none; }
+  .day-task-row:nth-child(even) { background:var(--pale); }
+  .task-loc { background:var(--navy); color:#fff; padding:2px 10px; border-radius:3px;
+              font-size:12px; font-weight:bold; white-space:nowrap; }
+  .task-dc { background:var(--orange); color:#fff; padding:2px 8px; border-radius:3px;
+             font-size:11px; font-weight:bold; white-space:nowrap; }
+  .task-desc { flex:1; color:var(--text); }
+  .task-info { color:var(--text); opacity:0.6; font-size:12px; font-style:italic; max-width:200px; }
+
+  /* View Tabs */
+  .view-tabs { display:flex; gap:0; margin-bottom:0; }
+  .view-tab { padding:10px 24px; font-size:14px; font-weight:bold; cursor:pointer;
+              border:2px solid var(--blue); border-bottom:none; border-radius:8px 8px 0 0;
+              background:var(--pale); color:var(--text); transition:all 0.15s; margin-right:2px; }
+  .view-tab:hover { background:var(--ltblue); }
+  .view-tab.active { background:var(--blue); color:#fff; }
+  .tab-content { border:2px solid var(--blue); border-radius:0 8px 8px 8px; padding:0;
+                 background:var(--card-bg); }
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+  .week-header { background:var(--navy); color:#fff; padding:12px 20px; display:flex;
+                 justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+  .week-header h3 { font-size:16px; letter-spacing:0.5px; }
+  .week-day-cards { padding:16px; display:flex; flex-direction:column; gap:12px; }
+  .day-card { border:1px solid var(--border-col); border-radius:6px; overflow:hidden; }
+  .day-card-header { background:var(--blue); color:#fff; padding:8px 16px; font-weight:bold;
+                     font-size:14px; display:flex; justify-content:space-between; align-items:center; }
+  .day-card-body { background:var(--card-bg); }
+  .day-card-row { display:flex; padding:8px 16px; font-size:13px; border-bottom:1px solid var(--border-col);
+                  align-items:center; gap:10px; }
+  .day-card-row:last-child { border-bottom:none; }
+  .day-card-row:nth-child(even) { background:var(--pale); }
+  .day-card-num { background:var(--navy); color:#fff; padding:2px 8px; border-radius:3px;
+                  font-size:11px; font-weight:bold; min-width:30px; text-align:center; }
+  .day-card-loc { background:var(--orange); color:#fff; padding:2px 10px; border-radius:3px;
+                  font-size:12px; font-weight:bold; white-space:nowrap; }
+  .day-card-desc { flex:1; color:var(--text); }
+  .day-card-info { color:var(--text); opacity:0.6; font-size:12px; font-style:italic; max-width:180px; }
+  .day-card-actions { display:flex; gap:4px; }
+  .week-empty { text-align:center; padding:40px; color:var(--text); opacity:0.5; font-size:16px; }
+  .week-stats { display:flex; gap:8px; }
+  .week-stat-badge { background:rgba(255,255,255,0.2); padding:3px 10px; border-radius:12px;
+                     font-size:12px; font-weight:bold; }
+
+  /* Search bar */
+  .search-bar { display:flex; align-items:center; gap:8px; padding:10px 16px;
+                background:var(--pale); border-bottom:1px solid var(--border-col); }
+  .search-bar input { flex:1; padding:8px 12px; font-size:14px; border:1px solid var(--input-border);
+                      border-radius:4px; background:var(--input-bg); color:var(--text); }
+  .search-bar input::placeholder { color:var(--text); opacity:0.4; }
+  .search-bar .search-icon { color:var(--blue); font-weight:bold; font-size:16px; }
+  .search-bar .search-count { font-size:12px; color:var(--text); opacity:0.6; font-weight:bold; }
+
+  /* Stats dashboard */
+  .stats-dash { display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+  .mini-stat { display:flex; align-items:center; gap:8px; background:var(--card-bg);
+               border:2px solid var(--blue); border-radius:8px; padding:8px 16px; }
+  .mini-stat .mini-num { font-size:22px; font-weight:bold; color:var(--navy); }
+  .mini-stat .mini-label { font-size:11px; font-weight:bold; color:var(--blue);
+                           text-transform:uppercase; line-height:1.2; }
+  .mini-stat .mini-sub { font-size:10px; color:var(--text); opacity:0.5; }
+
+  .btn-export { background:var(--navy); }
+
+  .version-label { position:fixed; bottom:10px; left:14px; font-size:11px; font-weight:bold;
+                   color:var(--text); opacity:0.35; letter-spacing:0.5px; z-index:100;
+                   pointer-events:none; }
+
+  .kbd-hint { font-size:11px; color:var(--text); opacity:0.4; margin-left:4px; }
+  kbd { background:var(--pale); border:1px solid var(--input-border); border-radius:3px;
+        padding:1px 5px; font-size:10px; font-family:monospace; }
+
+  @media print {
+    body * { visibility: hidden; }
+    .modal, .modal * { visibility: visible; }
+    .modal { position:absolute; left:0; top:0; width:100%; box-shadow:none; }
+    .modal-close, .modal-actions { display:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="banner">
+  <span class="banner-title">EVI DAILY TASK LOG &mdash; Datacenter EVI01</span>
+  <div class="theme-picker">
+    <span>THEME</span>
+    <div class="theme-dot active" data-theme="classic-blue" style="background:linear-gradient(135deg,#1F3864,#2E75B6);" title="Classic Blue"></div>
+    <div class="theme-dot" data-theme="dark" style="background:linear-gradient(135deg,#0a0f14,#1b4965);" title="Dark"></div>
+    <div class="theme-dot" data-theme="emerald" style="background:linear-gradient(135deg,#064e3b,#059669);" title="Emerald"></div>
+    <div class="theme-dot" data-theme="sunset" style="background:linear-gradient(135deg,#7c2d12,#c2410c);" title="Sunset"></div>
+    <div class="theme-dot" data-theme="purple" style="background:linear-gradient(135deg,#3b0764,#7c3aed);" title="Purple"></div>
+    <div class="theme-dot" data-theme="steel" style="background:linear-gradient(135deg,#1e293b,#475569);" title="Steel"></div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="form-section">
+    <div class="cal-card">
+      <h3>SELECT DATE</h3>
+      <input type="date" id="entryDate">
+      <div class="date-display">
+        <span class="date-val" id="dispDate"></span>
+        <span class="day-val" id="dispDay"></span>
+      </div>
+    </div>
+
+    <div class="details-card">
+      <h3>TASK DETAILS</h3>
+      <div class="form-row">
+        <label>Location</label>
+        <div class="radio-group" id="locGroup">
+          <input type="radio" name="location" id="loc-DH1" value="DH1" checked><label for="loc-DH1">DH1</label>
+          <input type="radio" name="location" id="loc-DH2" value="DH2"><label for="loc-DH2">DH2</label>
+          <input type="radio" name="location" id="loc-DH3" value="DH3"><label for="loc-DH3">DH3</label>
+          <input type="radio" name="location" id="loc-DH4" value="DH4"><label for="loc-DH4">DH4</label>
+          <input type="radio" name="location" id="loc-DH5" value="DH5"><label for="loc-DH5">DH5</label>
+          <input type="radio" name="location" id="loc-DH6" value="DH6"><label for="loc-DH6">DH6</label>
+          <input type="radio" name="location" id="loc-Other" value="Other"><label for="loc-Other">Others</label>
+          <input type="text" id="locOther" placeholder="Enter location..." style="width:140px; padding:6px 8px; font-size:13px; border:1px solid var(--input-border); border-radius:4px; background:var(--input-bg); color:var(--text); display:none;">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>DC Code</label>
+        <input type="text" id="dcCode" value="EVI01" style="max-width:160px;">
+      </div>
+      <div class="form-row">
+        <label>Description</label>
+        <textarea id="description" rows="3" placeholder="Enter task description..."></textarea>
+      </div>
+      <div class="form-row">
+        <label>Add. Info</label>
+        <textarea id="addInfo" rows="2" placeholder="Optional additional information..."></textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-save" onclick="saveEntry()">SAVE ENTRY <span class="kbd-hint"><kbd>Ctrl</kbd>+<kbd>S</kbd></span></button>
+        <button class="btn btn-clear" onclick="clearForm()">CLEAR FORM</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS DASHBOARD -->
+  <div class="stats-dash" id="statsDash">
+    <div class="mini-stat">
+      <span class="mini-num" id="statToday">-</span>
+      <span><span class="mini-label">Today</span><br><span class="mini-sub" id="statTodayDate"></span></span>
+    </div>
+    <div class="mini-stat">
+      <span class="mini-num" id="statWeek">-</span>
+      <span><span class="mini-label">This Week</span><br><span class="mini-sub" id="statWeekLabel"></span></span>
+    </div>
+    <div class="mini-stat">
+      <span class="mini-num" id="statTotal">-</span>
+      <span><span class="mini-label">All Time</span><br><span class="mini-sub">total records</span></span>
+    </div>
+  </div>
+
+  <div class="status-bar" id="statusBar">Ready &mdash; select a date and fill in the form.</div>
+
+  <div class="recall-bar">
+    <span class="recall-label">RECALL</span>
+    <button class="btn btn-blue" onclick="recallByDate()">By Selected Date</button>
+    <button class="btn btn-blue" onclick="recallByWeek()">By This Week</button>
+    <button class="btn btn-blue" onclick="recallAll()">All Records</button>
+    <button class="btn btn-save" onclick="showWeeklySummary()" style="margin-left:4px;">WEEKLY SUMMARY</button>
+    <button class="btn btn-export" onclick="exportCSV()" style="margin-left:4px;">EXPORT CSV</button>
+    <span style="margin-left:16px; font-weight:bold; color:var(--text);">Week #:</span>
+    <input type="number" id="weekNum" min="1" max="53">
+    <span style="font-weight:bold; color:var(--text);">Year:</span>
+    <input type="number" id="yearNum" min="2020" max="2035">
+    <span class="record-count" id="recordCount"></span>
+  </div>
+
+  <div class="view-tabs">
+    <div class="view-tab active" onclick="switchTab('all')">All Records</div>
+    <div class="view-tab" onclick="switchTab('week')">Current Week</div>
+  </div>
+  <div class="tab-content">
+    <div class="tab-panel active" id="tabAll">
+      <div class="search-bar">
+        <span class="search-icon">SEARCH</span>
+        <input type="text" id="searchInput" placeholder="Filter by description, location, date..." oninput="filterTable()">
+        <span class="search-count" id="searchCount"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Date</th><th>Day</th><th>Description</th>
+              <th>Location</th><th>DC Code</th><th>Add. Info</th><th>Saved At</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="taskBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="tab-panel" id="tabWeek">
+      <div class="week-header" id="cwHeader">
+        <h3 id="cwTitle">Current Week</h3>
+        <div class="week-stats" id="cwStats"></div>
+      </div>
+      <div class="week-day-cards" id="cwBody">
+        <div class="week-empty">Loading...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Weekly Summary Modal -->
+<div class="modal-overlay" id="summaryModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="summaryTitle">WEEKLY SUMMARY</h2>
+      <button class="modal-close" onclick="closeSummary()">&times;</button>
+    </div>
+    <div class="modal-body" id="summaryBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-blue" onclick="window.print()">PRINT SUMMARY</button>
+      <button class="btn btn-clear" onclick="closeSummary()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Record Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <h2 id="editTitle">EDIT RECORD</h2>
+      <button class="modal-close" onclick="closeEdit()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId">
+      <div class="form-row">
+        <label>Date</label>
+        <input type="date" id="editDate" style="flex:1; padding:8px; font-size:14px; border:1px solid #ccc; border-radius:4px; background:var(--pale); color:var(--navy);">
+      </div>
+      <div class="form-row">
+        <label>Location</label>
+        <div class="radio-group" id="editLocGroup">
+          <input type="radio" name="editLocation" id="edit-loc-DH1" value="DH1"><label for="edit-loc-DH1">DH1</label>
+          <input type="radio" name="editLocation" id="edit-loc-DH2" value="DH2"><label for="edit-loc-DH2">DH2</label>
+          <input type="radio" name="editLocation" id="edit-loc-DH3" value="DH3"><label for="edit-loc-DH3">DH3</label>
+          <input type="radio" name="editLocation" id="edit-loc-DH4" value="DH4"><label for="edit-loc-DH4">DH4</label>
+          <input type="radio" name="editLocation" id="edit-loc-DH5" value="DH5"><label for="edit-loc-DH5">DH5</label>
+          <input type="radio" name="editLocation" id="edit-loc-DH6" value="DH6"><label for="edit-loc-DH6">DH6</label>
+          <input type="radio" name="editLocation" id="edit-loc-Other" value="Other"><label for="edit-loc-Other">Others</label>
+          <input type="text" id="editLocOther" placeholder="Enter location..." style="width:140px; padding:6px 8px; font-size:13px; border:1px solid var(--input-border); border-radius:4px; background:var(--input-bg); color:var(--text); display:none;">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>DC Code</label>
+        <input type="text" id="editDcCode" value="EVI01" style="max-width:160px;">
+      </div>
+      <div class="form-row">
+        <label>Description</label>
+        <textarea id="editDescription" rows="3" placeholder="Enter task description..."></textarea>
+      </div>
+      <div class="form-row">
+        <label>Add. Info</label>
+        <textarea id="editAddInfo" rows="2" placeholder="Optional additional information..."></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-save" onclick="submitEdit()">UPDATE RECORD</button>
+      <button class="btn btn-clear" onclick="closeEdit()">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- Version Label -->
+<div class="version-label">Alpha v.1.0.0</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+// ══════════════════════════════════════════════════
+// localStorage Data Layer
+// ══════════════════════════════════════════════════
+const STORAGE_KEY = "evi_tasks";
+let nextId = 1;
+
+function loadTasks() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  const tasks = raw ? JSON.parse(raw) : [];
+  if (tasks.length) nextId = Math.max(...tasks.map(t => t.id)) + 1;
+  return tasks;
+}
+
+function saveTasks(tasks) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+}
+
+function addTask(entry_date, description, location, dc_code, add_info) {
+  const tasks = loadTasks();
+  const d = new Date(entry_date + "T00:00:00");
+  const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const now = new Date();
+  const record = {
+    id: nextId++,
+    entry_date: entry_date,
+    day_name: dayNames[d.getDay()],
+    description: description,
+    location: location,
+    dc_code: dc_code || "EVI01",
+    add_info: add_info || "",
+    week_number: getWeekNumber(d),
+    year: d.getFullYear(),
+    saved_at: now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-"
+              + String(now.getDate()).padStart(2,"0") + " " + String(now.getHours()).padStart(2,"0")
+              + ":" + String(now.getMinutes()).padStart(2,"0") + ":" + String(now.getSeconds()).padStart(2,"0"),
+  };
+  tasks.push(record);
+  saveTasks(tasks);
+  return record.id;
+}
+
+function getTask(id) {
+  return loadTasks().find(t => t.id === id) || null;
+}
+
+function updateTask(id, entry_date, description, location, dc_code, add_info) {
+  const tasks = loadTasks();
+  const idx = tasks.findIndex(t => t.id === id);
+  if (idx === -1) return false;
+  const d = new Date(entry_date + "T00:00:00");
+  const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  tasks[idx].entry_date = entry_date;
+  tasks[idx].day_name = dayNames[d.getDay()];
+  tasks[idx].description = description;
+  tasks[idx].location = location;
+  tasks[idx].dc_code = dc_code || "EVI01";
+  tasks[idx].add_info = add_info || "";
+  tasks[idx].week_number = getWeekNumber(d);
+  tasks[idx].year = d.getFullYear();
+  saveTasks(tasks);
+  return true;
+}
+
+function deleteTask(id) {
+  const tasks = loadTasks().filter(t => t.id !== id);
+  saveTasks(tasks);
+}
+
+function fetchTasksByMode(mode, params) {
+  const tasks = loadTasks();
+  if (mode === "date") {
+    return tasks.filter(t => t.entry_date === params.date).sort((a,b) => a.saved_at.localeCompare(b.saved_at));
+  } else if (mode === "week") {
+    const yr = parseInt(params.year), wk = parseInt(params.week);
+    return tasks.filter(t => t.year === yr && t.week_number === wk)
+                .sort((a,b) => a.entry_date.localeCompare(b.entry_date) || a.saved_at.localeCompare(b.saved_at));
+  } else {
+    return tasks.sort((a,b) => b.entry_date.localeCompare(a.entry_date) || b.saved_at.localeCompare(a.saved_at));
+  }
+}
+
+// ══════════════════════════════════════════════════
+// UI Logic (same as Flask version)
+// ══════════════════════════════════════════════════
+let activeTab = "all";
+
+function init() {
+  const today = new Date();
+  const iso = today.toISOString().slice(0, 10);
+  $("entryDate").value = iso;
+  updateDateDisplay(iso);
+  const wk = getWeekNumber(today);
+  $("weekNum").value = wk;
+  $("yearNum").value = today.getFullYear();
+  $("entryDate").addEventListener("change", () => updateDateDisplay($("entryDate").value));
+  recallAll();
+  updateStats();
+}
+
+function updateDateDisplay(isoStr) {
+  if (!isoStr) return;
+  const parts = isoStr.split("-");
+  const d = new Date(parts[0], parts[1]-1, parts[2]);
+  const options = { day: "2-digit", month: "short", year: "numeric" };
+  $("dispDate").textContent = d.toLocaleDateString("en-GB", options).replace(/ /g, "-");
+  $("dispDay").textContent = d.toLocaleDateString("en-US", { weekday: "long" });
+  setStatus("Date selected: " + d.toLocaleDateString("en-US", { weekday:"long", day:"2-digit", month:"short", year:"numeric" })
+            + "  (Week " + getWeekNumber(d) + ")");
+}
+
+function getWeekNumber(d) {
+  const jan1 = new Date(d.getFullYear(), 0, 1);
+  const jan1Day = jan1.getDay();
+  const daysToFirstMon = jan1Day === 0 ? 1 : (jan1Day === 1 ? 0 : 8 - jan1Day);
+  const firstMonday = new Date(d.getFullYear(), 0, 1 + daysToFirstMon);
+  if (d < firstMonday) return 0;
+  return Math.floor((d - firstMonday) / 604800000) + 1;
+}
+
+function getLocation() {
+  const checked = document.querySelector('input[name="location"]:checked');
+  if (checked && checked.value === "Other") return $("locOther").value.trim() || "Other";
+  return checked ? checked.value : "DH1";
+}
+
+function getEditLocation() {
+  const checked = document.querySelector('input[name="editLocation"]:checked');
+  if (checked && checked.value === "Other") return $("editLocOther").value.trim() || "Other";
+  return checked ? checked.value : "DH1";
+}
+
+function setupOtherToggle(radioName, inputId) {
+  document.querySelectorAll('input[name="' + radioName + '"]').forEach(r => {
+    r.addEventListener("change", () => {
+      $(inputId).style.display = r.value === "Other" && r.checked ? "inline-block" : "none";
+      if (r.value === "Other" && r.checked) $(inputId).focus();
+    });
+  });
+}
+setupOtherToggle("location", "locOther");
+setupOtherToggle("editLocation", "editLocOther");
+
+// ── Save ──────────────────────────────────────────
+function saveEntry() {
+  const desc = $("description").value.trim();
+  if (!desc) { toast("Please enter a task description.", "error"); $("description").focus(); return; }
+  const rowId = addTask(
+    $("entryDate").value, desc, getLocation(),
+    $("dcCode").value.trim() || "EVI01", $("addInfo").value.trim()
+  );
+  toast("Entry #" + rowId + " saved successfully!", "success");
+  setStatus("SAVED  Record #" + rowId);
+  clearForm();
+  refreshActiveTab();
+}
+
+function clearForm() {
+  $("description").value = "";
+  $("addInfo").value = "";
+  $("dcCode").value = "EVI01";
+  document.getElementById("loc-DH1").checked = true;
+  $("locOther").value = "";
+  $("locOther").style.display = "none";
+  const today = new Date().toISOString().slice(0,10);
+  $("entryDate").value = today;
+  updateDateDisplay(today);
+  setStatus("Form cleared — ready for new entry.");
+}
+
+// ── Delete ────────────────────────────────────────
+function deleteRecord(id) {
+  if (!confirm("Delete record #" + id + "?\nThis cannot be undone.")) return;
+  deleteTask(id);
+  toast("Record #" + id + " deleted.", "success");
+  refreshActiveTab();
+}
+
+// ── Edit ──────────────────────────────────────────
+function editRecord(id) {
+  const r = getTask(id);
+  if (!r) { toast("Could not load record.", "error"); return; }
+  $("editId").value = r.id;
+  $("editDate").value = r.entry_date;
+  $("editDcCode").value = r.dc_code || "EVI01";
+  $("editDescription").value = r.description || "";
+  $("editAddInfo").value = r.add_info || "";
+  const loc = r.location || "DH1";
+  const knownLocs = ["DH1","DH2","DH3","DH4","DH5","DH6"];
+  if (knownLocs.includes(loc)) {
+    document.getElementById("edit-loc-" + loc).checked = true;
+    $("editLocOther").style.display = "none";
+    $("editLocOther").value = "";
+  } else {
+    document.getElementById("edit-loc-Other").checked = true;
+    $("editLocOther").style.display = "inline-block";
+    $("editLocOther").value = loc;
+  }
+  $("editTitle").textContent = "EDIT RECORD #" + r.id;
+  $("editModal").classList.add("open");
+}
+
+function submitEdit() {
+  const id = parseInt($("editId").value);
+  const desc = $("editDescription").value.trim();
+  if (!desc) { toast("Description is required.", "error"); $("editDescription").focus(); return; }
+  updateTask(id, $("editDate").value, desc, getEditLocation(),
+             $("editDcCode").value.trim() || "EVI01", $("editAddInfo").value.trim());
+  toast("Record #" + id + " updated successfully!", "success");
+  closeEdit();
+  refreshActiveTab();
+}
+
+function closeEdit() { $("editModal").classList.remove("open"); }
+
+// ── Recall ────────────────────────────────────────
+function recallByDate() {
+  const d = $("entryDate").value;
+  const rows = fetchTasksByMode("date", { date: d });
+  renderTable(rows);
+  $("recordCount").textContent = rows.length + " record(s) for " + d;
+  setStatus("Recall by date: " + d + " — " + rows.length + " found");
+}
+
+function recallByWeek() {
+  const yr = $("yearNum").value;
+  const wk = $("weekNum").value;
+  const rows = fetchTasksByMode("week", { year: yr, week: wk });
+  renderTable(rows);
+  $("recordCount").textContent = rows.length + " record(s) — Year " + yr + ", Week " + wk;
+  setStatus("Recall by week: Year " + yr + ", Week " + wk + " — " + rows.length + " found");
+}
+
+function recallAll() {
+  const rows = fetchTasksByMode("all");
+  renderTable(rows);
+  $("recordCount").textContent = rows.length + " total record(s)";
+  setStatus("All records — " + rows.length + " total");
+}
+
+// ── Table ─────────────────────────────────────────
+function renderTable(rows) {
+  const tbody = $("taskBody");
+  tbody.innerHTML = "";
+  rows.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="center">${r.id}</td>
+      <td class="center">${r.entry_date}</td>
+      <td class="center">${r.day_name}</td>
+      <td class="desc-col">${esc(r.description||"")}</td>
+      <td class="center">${r.location||""}</td>
+      <td class="center">${r.dc_code||"EVI01"}</td>
+      <td class="info-col">${esc(r.add_info||"")}</td>
+      <td class="center">${r.saved_at||""}</td>
+      <td class="actions">
+        <button class="act-btn act-dup" onclick="dupRecord(${r.id})">DUP</button>
+        <button class="act-btn act-edit" onclick="editRecord(${r.id})">EDIT</button>
+        <button class="act-btn act-del" onclick="deleteRecord(${r.id})">DEL</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function esc(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+// ── Helpers ───────────────────────────────────────
+function setStatus(msg) { $("statusBar").textContent = msg; }
+
+function toast(msg, type) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.className = "toast toast-" + type + " show";
+  setTimeout(() => t.className = "toast", 3000);
+}
+
+// ── Refresh active tab ───────────────────────────
+function refreshActiveTab() {
+  if (activeTab === "week") loadCurrentWeek();
+  else recallAll();
+  updateStats();
+}
+
+// ── Tab Switching ────────────────────────────────
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll(".view-tab").forEach((t, i) => {
+    t.classList.toggle("active", (i === 0 && tab === "all") || (i === 1 && tab === "week"));
+  });
+  $("tabAll").classList.toggle("active", tab === "all");
+  $("tabWeek").classList.toggle("active", tab === "week");
+  if (tab === "week") loadCurrentWeek();
+}
+
+function loadCurrentWeek() {
+  const yr = $("yearNum").value;
+  const wk = $("weekNum").value;
+  const rows = fetchTasksByMode("week", { year: yr, week: wk });
+
+  $("cwTitle").textContent = "Week " + wk + " — " + yr;
+  $("cwStats").innerHTML = '<span class="week-stat-badge">' + rows.length + ' task(s)</span>';
+
+  const body = $("cwBody");
+  if (rows.length === 0) {
+    body.innerHTML = '<div class="week-empty">No tasks recorded for this week.</div>';
+    $("recordCount").textContent = "0 record(s) — Week " + wk;
+    return;
+  }
+
+  const daysOrder = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  const byDay = {};
+  rows.forEach(r => {
+    const d = r.day_name;
+    if (!byDay[d]) byDay[d] = { date: r.entry_date, tasks: [] };
+    byDay[d].tasks.push(r);
+  });
+
+  let html = "";
+  daysOrder.forEach(day => {
+    if (!byDay[day]) return;
+    const g = byDay[day];
+    html += '<div class="day-card">';
+    html += '<div class="day-card-header"><span>' + esc(day) + ' — ' + esc(g.date) + '</span>'
+          + '<span>' + g.tasks.length + ' task(s)</span></div>';
+    html += '<div class="day-card-body">';
+    g.tasks.forEach((t, i) => {
+      html += '<div class="day-card-row">';
+      html += '<span class="day-card-num">' + (i+1) + '</span>';
+      html += '<span class="day-card-loc">' + esc(t.location||"") + '</span>';
+      html += '<span class="day-card-desc">' + esc(t.description||"") + '</span>';
+      if (t.add_info) html += '<span class="day-card-info">' + esc(t.add_info) + '</span>';
+      html += '<span class="day-card-actions">'
+            + '<button class="act-btn act-edit" onclick="editRecord(' + t.id + ')">EDIT</button>'
+            + '<button class="act-btn act-del" onclick="deleteRecord(' + t.id + ')">DEL</button>'
+            + '</span>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+  });
+  body.innerHTML = html;
+  $("recordCount").textContent = rows.length + " record(s) — Week " + wk;
+  setStatus("Current week: Year " + yr + ", Week " + wk + " — " + rows.length + " found");
+}
+
+// ── Weekly Summary ────────────────────────────────
+function showWeeklySummary() {
+  const yr = $("yearNum").value;
+  const wk = $("weekNum").value;
+  const tasks = fetchTasksByMode("week", { year: yr, week: wk });
+
+  $("summaryTitle").textContent = "WEEKLY SUMMARY — Year " + yr + ", Week " + wk;
+
+  if (tasks.length === 0) {
+    toast("No records found for Year " + yr + ", Week " + wk, "error");
+    return;
+  }
+
+  // Group by day
+  const daysOrder = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  const byDay = {};
+  tasks.forEach(t => {
+    if (!byDay[t.day_name]) byDay[t.day_name] = [];
+    byDay[t.day_name].push(t);
+  });
+  const daysSorted = daysOrder.filter(d => byDay[d]).map(d => ({ day: d, date: byDay[d][0].entry_date, tasks: byDay[d] }));
+
+  // Stats by location
+  const locCounts = {};
+  tasks.forEach(t => { const l = t.location || "Unknown"; locCounts[l] = (locCounts[l]||0) + 1; });
+
+  // Date range
+  const dates = [...new Set(tasks.map(t => t.entry_date))].sort();
+  const dateRange = dates.length ? dates[0] + " to " + dates[dates.length-1] : "No records";
+
+  // AI Summary
+  const aiSummary = generateAISummary(tasks, daysSorted, locCounts, dateRange);
+
+  let html = "";
+  if (aiSummary) html += '<div class="ai-summary-box">' + esc(aiSummary) + '</div>';
+
+  html += '<div class="summary-stats">';
+  html += statCard(tasks.length, "TOTAL TASKS");
+  html += statCard(daysSorted.length, "ACTIVE DAYS");
+  html += statCard(Object.keys(locCounts).length, "LOCATIONS");
+  html += statCard(dateRange, "DATE RANGE", true);
+  html += '</div>';
+
+  html += '<div class="loc-badges">';
+  Object.entries(locCounts).sort((a,b) => b[1]-a[1]).forEach(([loc, cnt]) => {
+    html += '<div class="loc-badge">' + esc(loc) + '<span>' + cnt + '</span></div>';
+  });
+  html += '</div>';
+
+  daysSorted.forEach(day => {
+    html += '<div class="day-section">';
+    html += '<div class="day-header"><span>' + esc(day.day) + ' — ' + esc(day.date) + '</span>'
+          + '<span>' + day.tasks.length + ' task(s)</span></div>';
+    html += '<div class="day-tasks">';
+    day.tasks.forEach(t => {
+      html += '<div class="day-task-row">';
+      html += '<span class="task-loc">' + esc(t.location||"") + '</span>';
+      html += '<span class="task-dc">' + esc(t.dc_code||"EVI01") + '</span>';
+      html += '<span class="task-desc">' + esc(t.description||"") + '</span>';
+      if (t.add_info) html += '<span class="task-info">' + esc(t.add_info) + '</span>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+  });
+
+  $("summaryBody").innerHTML = html;
+  $("summaryModal").classList.add("open");
+}
+
+function generateAISummary(tasks, daysSorted, locCounts, dateRange) {
+  if (!tasks.length) return "No tasks recorded for this week.";
+  const total = tasks.length;
+  const numDays = daysSorted.length;
+  const allLocs = Object.keys(locCounts).sort();
+  const topLoc = Object.entries(locCounts).sort((a,b) => b[1]-a[1])[0];
+  const busiestDay = daysSorted.reduce((a,b) => b.tasks.length > a.tasks.length ? b : a);
+  const allDescs = tasks.map(t => (t.description||"").toLowerCase());
+
+  const keywords = {
+    "installation": ["install","setup","deploy","mounted"],
+    "maintenance": ["maintenance","repair","replace","fix","cleaned"],
+    "rack work": ["rack","racking","rail","shelf","cabinet"],
+    "cabling": ["cable","cabling","fiber","patch","wiring"],
+    "inspection": ["inspect","check","audit","survey","verify"],
+    "decommission": ["decommission","removal","removed","decom"],
+    "power work": ["power","pdu","ups","breaker","circuit"],
+    "network": ["network","switch","router","firewall","port"],
+    "server work": ["server","blade","node","compute","host"],
+    "cooling": ["cooling","hvac","crac","temperature","airflow"],
+    "labeling": ["label","labeling","tagged","tagging"],
+    "inventory": ["inventory","asset","count","stock"],
+    "adjustment": ["adjust","adjustment","realign","reposition"],
+  };
+  const categories = [];
+  for (const [cat, kws] of Object.entries(keywords)) {
+    if (allDescs.some(desc => kws.some(kw => desc.includes(kw)))) categories.push(cat);
+  }
+
+  const sentences = [];
+  const locList = allLocs.length <= 3 ? allLocs.join(", ") : allLocs.slice(0,3).join(", ") + " and " + (allLocs.length-3) + " more";
+  sentences.push("During this week, a total of " + total + (total !== 1 ? " tasks were" : " task was")
+    + " completed across " + numDays + " working day" + (numDays !== 1 ? "s" : "")
+    + " covering " + allLocs.length + " location" + (allLocs.length !== 1 ? "s" : "") + " (" + locList + ").");
+
+  if (Object.keys(locCounts).length === 1) {
+    sentences.push("All work was concentrated at " + topLoc[0] + ".");
+  } else {
+    const pct = Math.round(topLoc[1] / total * 100);
+    const others = Object.entries(locCounts).sort((a,b) => b[1]-a[1]).filter(e => e[0] !== topLoc[0])
+                   .slice(0,2).map(e => e[0] + " (" + e[1] + ")").join(", ");
+    sentences.push("The primary focus was at " + topLoc[0] + " with " + topLoc[1] + " task"
+      + (topLoc[1] !== 1 ? "s" : "") + " (" + pct + "% of total), followed by " + others + ".");
+  }
+
+  if (categories.length) sentences.push("Key activities included " + categories.slice(0,3).join(", ") + ".");
+  else {
+    const highlights = [...new Set(tasks.slice(0,3).map(t => (t.description||"").slice(0,60)))];
+    if (highlights.length) sentences.push("Notable tasks: " + highlights.join("; ") + ".");
+  }
+
+  if (numDays > 1) {
+    sentences.push("The busiest day was " + busiestDay.day + " (" + busiestDay.date + ") with "
+      + busiestDay.tasks.length + " task" + (busiestDay.tasks.length !== 1 ? "s" : "") + " logged.");
+  }
+
+  const avg = Math.round(total / numDays * 10) / 10;
+  const load = avg >= 5 ? "a high-intensity" : avg >= 3 ? "a moderate" : avg >= 1.5 ? "a steady" : "a light";
+  sentences.push("Overall workload was " + load + " week with an average of " + avg + " task" + (avg !== 1 ? "s" : "") + " per day.");
+
+  return sentences.join(" ");
+}
+
+function statCard(value, label, small) {
+  const cls = small ? 'font-size:16px' : '';
+  return '<div class="stat-card"><div class="stat-num" style="' + cls + '">' + value + '</div>'
+       + '<div class="stat-label">' + label + '</div></div>';
+}
+
+function closeSummary() { $("summaryModal").classList.remove("open"); }
+
+// Close modals on overlay click
+document.addEventListener("click", function(e) {
+  if (e.target.id === "summaryModal") closeSummary();
+  if (e.target.id === "editModal") closeEdit();
+});
+
+// ── Theme Switcher ────────────────────────────────
+function setTheme(name) {
+  document.documentElement.setAttribute("data-theme", name);
+  document.querySelectorAll(".theme-dot").forEach(d => d.classList.remove("active"));
+  const active = document.querySelector('.theme-dot[data-theme="'+name+'"]');
+  if (active) active.classList.add("active");
+  localStorage.setItem("evi-theme", name);
+}
+document.querySelectorAll(".theme-dot").forEach(dot => {
+  dot.addEventListener("click", () => setTheme(dot.dataset.theme));
+});
+const savedTheme = localStorage.getItem("evi-theme");
+if (savedTheme) setTheme(savedTheme);
+
+// ── Search / Filter ──────────────────────────────
+function filterTable() {
+  const q = $("searchInput").value.toLowerCase().trim();
+  const tbody = $("taskBody");
+  const rows = tbody.querySelectorAll("tr");
+  let visible = 0;
+  rows.forEach(tr => {
+    const text = tr.textContent.toLowerCase();
+    const show = !q || text.includes(q);
+    tr.style.display = show ? "" : "none";
+    if (show) visible++;
+  });
+  $("searchCount").textContent = q ? visible + " of " + rows.length + " shown" : "";
+}
+
+// ── Export CSV ───────────────────────────────────
+function exportCSV() {
+  const tbody = $("taskBody");
+  const rows = tbody.querySelectorAll("tr");
+  if (rows.length === 0) { toast("No records to export.", "error"); return; }
+  const headers = ["ID","Date","Day","Description","Location","DC Code","Add. Info","Saved At"];
+  let csv = headers.join(",") + "\n";
+  rows.forEach(tr => {
+    if (tr.style.display === "none") return;
+    const cells = tr.querySelectorAll("td");
+    const vals = [];
+    for (let i = 0; i < cells.length - 1; i++) {
+      let v = cells[i].textContent.trim().replace(/"/g, '""');
+      vals.push('"' + v + '"');
+    }
+    csv += vals.join(",") + "\n";
+  });
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "EVI_Tasks_" + new Date().toISOString().slice(0,10) + ".csv";
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("CSV exported successfully!", "success");
+}
+
+// ── Quick Duplicate ──────────────────────────────
+function dupRecord(id) {
+  const r = getTask(id);
+  if (!r) { toast("Could not load record.", "error"); return; }
+  $("entryDate").value = new Date().toISOString().slice(0,10);
+  updateDateDisplay($("entryDate").value);
+  $("description").value = r.description || "";
+  $("addInfo").value = r.add_info || "";
+  $("dcCode").value = r.dc_code || "EVI01";
+  const knownLocs = ["DH1","DH2","DH3","DH4","DH5","DH6"];
+  const loc = r.location || "DH1";
+  if (knownLocs.includes(loc)) {
+    document.getElementById("loc-" + loc).checked = true;
+    $("locOther").style.display = "none";
+    $("locOther").value = "";
+  } else {
+    document.getElementById("loc-Other").checked = true;
+    $("locOther").style.display = "inline-block";
+    $("locOther").value = loc;
+  }
+  toast("Form filled from record #" + id + " — edit and save as new.", "success");
+  $("description").focus();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ── Stats Dashboard ──────────────────────────────
+function updateStats() {
+  const today = new Date().toISOString().slice(0,10);
+  const yr = new Date().getFullYear();
+  const wk = getWeekNumber(new Date());
+  const todayRows = fetchTasksByMode("date", { date: today });
+  const weekRows = fetchTasksByMode("week", { year: yr, week: wk });
+  const allRows = fetchTasksByMode("all");
+  $("statToday").textContent = todayRows.length;
+  $("statTodayDate").textContent = today;
+  $("statWeek").textContent = weekRows.length;
+  $("statWeekLabel").textContent = "Week " + wk;
+  $("statTotal").textContent = allRows.length;
+}
+
+// ── Keyboard Shortcuts ───────────────────────────
+document.addEventListener("keydown", function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+    e.preventDefault();
+    if ($("editModal").classList.contains("open")) submitEdit();
+    else saveEntry();
+  }
+  if (e.key === "Escape") {
+    if ($("editModal").classList.contains("open")) closeEdit();
+    else if ($("summaryModal").classList.contains("open")) closeSummary();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === "e") {
+    e.preventDefault();
+    exportCSV();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === "f" && activeTab === "all") {
+    if (document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+      e.preventDefault();
+      $("searchInput").focus();
+      $("searchInput").select();
+    }
+  }
+});
+
+init();
+</script>
+</body>
+</html>
