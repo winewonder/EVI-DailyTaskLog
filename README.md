@@ -1,0 +1,76 @@
+# EVI Daily Task Log
+
+A lightweight, browser-based daily task logger for datacenter operations at **EVI01**. Runs as a static GitHub Pages site with localStorage + JSON file backend.
+
+## Features
+
+- **Task Logging** — Record daily tasks with date, location (DH1-DH6 + custom), DC code, description, and additional info
+- **Weekly View** — Browse tasks week-by-week with prev/next navigation and a "Today" button
+- **Weekly Summary** — Modal with AI-generated summary, stats, location breakdown, and day-by-day detail
+- **Search & Filter** — Real-time search across all records
+- **Stats Dashboard** — At-a-glance counts for today, this week, and all time
+- **Inline Edit/Delete** — Edit or delete any record directly from the table
+- **Duplicate** — Quick-fill the form from an existing record
+- **Export/Import** — CSV export, JSON export/import for backup and transfer
+- **Data Persistence** — Records stored in localStorage and seeded from `data.json` in the repo
+- **CST Timezone** — All dates and timestamps locked to America/Chicago (CST/CDT)
+- **Theme Switcher** — 6 themes: Classic Blue, Dark, Emerald, Sunset, Purple, Steel
+- **Keyboard Shortcuts** — Ctrl+S (save), Ctrl+E (export CSV), Ctrl+F (search), Esc (close modals)
+- **Print** — Print-friendly weekly summary modal
+
+## Version History
+
+### v0.1.1 (2026-04-15)
+**Bug Fixes:**
+- Fixed date picker showing wrong day (tomorrow instead of today) due to UTC/local timezone mismatch
+- Fixed `toISOString()` returning UTC date instead of local date across all date operations
+- Fixed stats dashboard showing incorrect "today" and "this week" counts
+
+**New Features:**
+- Added CST (America/Chicago) timezone enforcement for all dates and timestamps
+- Added weekly view navigation with Prev/Next buttons and Today shortcut
+- Added `data.json` in repo — records auto-load from git file into localStorage on page load
+- Renamed "Current Week" tab to "Weekly View" with browse capability
+
+### v0.1.0 (2026-04-13)
+**Features:**
+- Search and filter across all records
+- Export to CSV
+- Duplicate record to quickly create similar entries
+- Stats dashboard (today, this week, all time)
+- Keyboard shortcuts (Ctrl+S, Ctrl+E, Ctrl+F, Esc)
+- Import/Export JSON for transferring records between devices
+
+### v0.0.3 (2026-04-12)
+**Features:**
+- Current Week tab view with day-by-day card layout
+- "Others" custom location option
+
+### v0.0.2 (2026-04-11)
+**Features:**
+- 6-theme switcher (Classic Blue, Dark, Emerald, Sunset, Purple, Steel)
+- Inline edit and delete records via modal
+- Weekly summary modal with AI-generated insights
+- Fixed record ID sequencing
+
+### v0.0.1 (2026-04-10)
+**Initial Release:**
+- Daily task logging with date, location, DC code, description, and additional info
+- GitHub Pages static site with localStorage backend
+- Table view with all records
+- Clipboard favicon for browser tab identity
+
+## Setup
+
+The app runs entirely in the browser. To use:
+
+1. Visit the GitHub Pages URL, or
+2. Open `docs/index.html` locally
+
+Records are stored in the browser's localStorage. The `docs/data.json` file provides seed data that auto-merges on first load.
+
+## Tech Stack
+
+- Single-file HTML/CSS/JavaScript (no build step, no dependencies)
+- localStorage for data persistence
+- GitHub Pages for hosting
