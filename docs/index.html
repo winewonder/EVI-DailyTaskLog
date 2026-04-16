@@ -519,6 +519,24 @@ function loadTasks() {
   return tasks;
 }
 
+function mergeRemoteTasks(remoteTasks) {
+  const local = loadTasks();
+  const localKeys = new Set(local.map(t => t.entry_date + "|" + t.saved_at));
+  let added = 0;
+  let maxId = local.length ? Math.max(...local.map(t => t.id)) : 0;
+  remoteTasks.forEach(t => {
+    const key = t.entry_date + "|" + t.saved_at;
+    if (!localKeys.has(key)) {
+      maxId++;
+      t.id = maxId;
+      local.push(t);
+      added++;
+    }
+  });
+  if (added) { saveTasks(local); nextId = maxId + 1; }
+  return added;
+}
+
 function saveTasks(tasks) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
 }
@@ -601,8 +619,16 @@ function init() {
   $("weekNum").value = wk;
   $("yearNum").value = today.getFullYear();
   $("entryDate").addEventListener("change", () => updateDateDisplay($("entryDate").value));
-  recallAll();
-  updateStats();
+
+  // Load records from data.json and merge into localStorage
+  fetch("data.json").then(r => r.json()).then(data => {
+    if (data.tasks && data.tasks.length) mergeRemoteTasks(data.tasks);
+    recallAll();
+    updateStats();
+  }).catch(() => {
+    recallAll();
+    updateStats();
+  });
 }
 
 function updateDateDisplay(isoStr) {
