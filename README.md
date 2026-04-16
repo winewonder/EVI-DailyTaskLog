@@ -18,7 +18,21 @@ A lightweight, browser-based daily task logger for datacenter operations at **EV
 - **Keyboard Shortcuts** — Ctrl+S (save), Ctrl+E (export CSV), Ctrl+F (search), Esc (close modals)
 - **Print** — Print-friendly weekly summary modal
 
+## Versioning Scheme
+
+Format: **vX.Y.Z**
+
+| Part | When to change | Example |
+|------|---------------|---------|
+| **X** (Major) | New feature release or stable version | v1.0.0 |
+| **Y** (Minor) | Major bug fix or significant improvement | v0.2.0 |
+| **Z** (Patch) | Minor bug fix or small tweak | v0.1.2 |
+
 ## Version History
+
+### v0.1.2 (2026-04-15)
+**Bug Fixes:**
+- Fixed date input text invisible in dark mode (font color matched dark background)
 
 ### v0.1.1 (2026-04-15)
 **Bug Fixes:**
