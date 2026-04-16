@@ -492,9 +492,18 @@
 <script>
 const $ = id => document.getElementById(id);
 
+const TZ = "America/Chicago";
+
+function nowCST() {
+  const s = new Date().toLocaleString("en-US", { timeZone: TZ });
+  return new Date(s);
+}
+
 function localDateStr(d) {
-  if (!d) d = new Date();
-  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  if (!d) d = nowCST();
+  const s = d.toLocaleString("en-US", { timeZone: TZ });
+  const p = new Date(s);
+  return p.getFullYear() + "-" + String(p.getMonth()+1).padStart(2,"0") + "-" + String(p.getDate()).padStart(2,"0");
 }
 
 // ══════════════════════════════════════════════════
@@ -518,7 +527,7 @@ function addTask(entry_date, description, location, dc_code, add_info) {
   const tasks = loadTasks();
   const d = new Date(entry_date + "T00:00:00");
   const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-  const now = new Date();
+  const now = nowCST();
   const record = {
     id: nextId++,
     entry_date: entry_date,
@@ -584,7 +593,7 @@ function fetchTasksByMode(mode, params) {
 let activeTab = "all";
 
 function init() {
-  const today = new Date();
+  const today = nowCST();
   const iso = localDateStr(today);
   $("entryDate").value = iso;
   updateDateDisplay(iso);
@@ -852,7 +861,7 @@ function navWeek(dir) {
 }
 
 function navWeekToday() {
-  const now = new Date();
+  const now = nowCST();
   $("weekNum").value = getWeekNumber(now);
   $("yearNum").value = now.getFullYear();
   loadCurrentWeek();
@@ -1128,8 +1137,9 @@ function dupRecord(id) {
 // ── Stats Dashboard ──────────────────────────────
 function updateStats() {
   const today = localDateStr();
-  const yr = new Date().getFullYear();
-  const wk = getWeekNumber(new Date());
+  const n = nowCST();
+  const yr = n.getFullYear();
+  const wk = getWeekNumber(n);
   const todayRows = fetchTasksByMode("date", { date: today });
   const weekRows = fetchTasksByMode("week", { year: yr, week: wk });
   const allRows = fetchTasksByMode("all");
