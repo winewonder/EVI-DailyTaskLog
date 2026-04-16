@@ -384,7 +384,7 @@
 
   <div class="view-tabs">
     <div class="view-tab active" onclick="switchTab('all')">All Records</div>
-    <div class="view-tab" onclick="switchTab('week')">Current Week</div>
+    <div class="view-tab" onclick="switchTab('week')">Weekly View</div>
   </div>
   <div class="tab-content">
     <div class="tab-panel active" id="tabAll">
@@ -407,7 +407,12 @@
     </div>
     <div class="tab-panel" id="tabWeek">
       <div class="week-header" id="cwHeader">
-        <h3 id="cwTitle">Current Week</h3>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button class="btn btn-clear" onclick="navWeek(-1)" style="padding:6px 14px; font-size:16px;">&larr; Prev</button>
+          <h3 id="cwTitle">Current Week</h3>
+          <button class="btn btn-clear" onclick="navWeek(1)" style="padding:6px 14px; font-size:16px;">Next &rarr;</button>
+          <button class="btn btn-blue" onclick="navWeekToday()" style="padding:6px 14px; font-size:12px;">Today</button>
+        </div>
         <div class="week-stats" id="cwStats"></div>
       </div>
       <div class="week-day-cards" id="cwBody">
@@ -486,6 +491,11 @@
 
 <script>
 const $ = id => document.getElementById(id);
+
+function localDateStr(d) {
+  if (!d) d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
 
 // ══════════════════════════════════════════════════
 // localStorage Data Layer
@@ -575,7 +585,7 @@ let activeTab = "all";
 
 function init() {
   const today = new Date();
-  const iso = today.toISOString().slice(0, 10);
+  const iso = localDateStr(today);
   $("entryDate").value = iso;
   updateDateDisplay(iso);
   const wk = getWeekNumber(today);
@@ -650,7 +660,7 @@ function clearForm() {
   document.getElementById("loc-DH1").checked = true;
   $("locOther").value = "";
   $("locOther").style.display = "none";
-  const today = new Date().toISOString().slice(0,10);
+  const today = localDateStr();
   $("entryDate").value = today;
   updateDateDisplay(today);
   setStatus("Form cleared — ready for new entry.");
@@ -828,6 +838,24 @@ function loadCurrentWeek() {
   body.innerHTML = html;
   $("recordCount").textContent = rows.length + " record(s) — Week " + wk;
   setStatus("Current week: Year " + yr + ", Week " + wk + " — " + rows.length + " found");
+}
+
+// ── Week Navigation ─────────────────────────────
+function navWeek(dir) {
+  let wk = parseInt($("weekNum").value) + dir;
+  let yr = parseInt($("yearNum").value);
+  if (wk < 1) { yr--; wk = 52; }
+  else if (wk > 52) { yr++; wk = 1; }
+  $("weekNum").value = wk;
+  $("yearNum").value = yr;
+  loadCurrentWeek();
+}
+
+function navWeekToday() {
+  const now = new Date();
+  $("weekNum").value = getWeekNumber(now);
+  $("yearNum").value = now.getFullYear();
+  loadCurrentWeek();
 }
 
 // ── Weekly Summary ────────────────────────────────
@@ -1026,7 +1054,7 @@ function exportCSV() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "EVI_Tasks_" + new Date().toISOString().slice(0,10) + ".csv";
+  a.download = "EVI_Tasks_" + localDateStr() + ".csv";
   a.click();
   URL.revokeObjectURL(url);
   toast("CSV exported successfully!", "success");
@@ -1041,7 +1069,7 @@ function exportJSON() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "EVI_Tasks_" + new Date().toISOString().slice(0,10) + ".json";
+  a.download = "EVI_Tasks_" + localDateStr() + ".json";
   a.click();
   URL.revokeObjectURL(url);
   toast("JSON exported — " + tasks.length + " record(s).", "success");
@@ -1076,7 +1104,7 @@ function importJSON(input) {
 function dupRecord(id) {
   const r = getTask(id);
   if (!r) { toast("Could not load record.", "error"); return; }
-  $("entryDate").value = new Date().toISOString().slice(0,10);
+  $("entryDate").value = localDateStr();
   updateDateDisplay($("entryDate").value);
   $("description").value = r.description || "";
   $("addInfo").value = r.add_info || "";
@@ -1099,7 +1127,7 @@ function dupRecord(id) {
 
 // ── Stats Dashboard ──────────────────────────────
 function updateStats() {
-  const today = new Date().toISOString().slice(0,10);
+  const today = localDateStr();
   const yr = new Date().getFullYear();
   const wk = getWeekNumber(new Date());
   const todayRows = fetchTasksByMode("date", { date: today });
