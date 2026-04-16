@@ -495,15 +495,11 @@ const $ = id => document.getElementById(id);
 const TZ = "America/Chicago";
 
 function nowCST() {
-  const s = new Date().toLocaleString("en-US", { timeZone: TZ });
-  return new Date(s);
+  return new Date(new Date().toLocaleString("en-US", { timeZone: TZ }));
 }
 
-function localDateStr(d) {
-  if (!d) d = nowCST();
-  const s = d.toLocaleString("en-US", { timeZone: TZ });
-  const p = new Date(s);
-  return p.getFullYear() + "-" + String(p.getMonth()+1).padStart(2,"0") + "-" + String(p.getDate()).padStart(2,"0");
+function localDateStr() {
+  return new Date().toLocaleDateString("en-CA", { timeZone: TZ });
 }
 
 // ══════════════════════════════════════════════════
