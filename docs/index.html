@@ -276,6 +276,17 @@
                    pointer-events:none; background:var(--red); padding:4px 12px;
                    border-radius:4px; }
 
+  .ac-wrap { flex:1; position:relative; }
+  .ac-wrap textarea { width:100%; }
+  .ac-list { display:none; position:absolute; left:0; right:0; top:100%; background:var(--card-bg);
+             border:1px solid var(--blue); border-radius:0 0 6px 6px; max-height:160px;
+             overflow-y:auto; z-index:500; box-shadow:0 4px 12px rgba(0,0,0,0.2); }
+  .ac-item { padding:8px 12px; font-size:13px; color:var(--text); cursor:pointer;
+             border-bottom:1px solid var(--border-col); }
+  .ac-item:last-child { border-bottom:none; }
+  .ac-item:hover { background:var(--ltblue); }
+  .ac-item mark { background:var(--orange); color:#fff; border-radius:2px; padding:0 2px; }
+
   .kbd-hint { font-size:11px; color:var(--text); opacity:0.4; margin-left:4px; }
   kbd { background:var(--pale); border:1px solid var(--input-border); border-radius:3px;
         padding:1px 5px; font-size:10px; font-family:monospace; }
@@ -335,7 +346,10 @@
       </div>
       <div class="form-row">
         <label>Description</label>
-        <textarea id="description" rows="3" placeholder="Enter task description..."></textarea>
+        <div class="ac-wrap">
+          <textarea id="description" rows="3" placeholder="Enter task description..." oninput="showSuggestions(this.value)"></textarea>
+          <div class="ac-list" id="acList"></div>
+        </div>
       </div>
       <div class="form-row">
         <label>Add. Info</label>
@@ -485,7 +499,7 @@
 </div>
 
 <!-- Version Label -->
-<div class="version-label"><span class="alpha-badge">Alpha</span> v0.2.0</div>
+<div class="version-label"><span class="alpha-badge">Alpha</span> v0.3.0</div>
 
 <!-- Toast notification -->
 <div class="toast" id="toast"></div>
@@ -686,8 +700,41 @@ function saveEntry() {
   refreshActiveTab();
 }
 
+// ── Auto-complete ────────────────────────────────
+function showSuggestions(q) {
+  const list = $("acList");
+  q = q.trim().toLowerCase();
+  if (q.length < 2) { list.style.display = "none"; return; }
+  const tasks = loadTasks();
+  const seen = new Set();
+  const matches = [];
+  tasks.forEach(t => {
+    const d = (t.description || "").trim();
+    const key = d.toLowerCase();
+    if (!seen.has(key) && key.includes(q)) { seen.add(key); matches.push(d); }
+  });
+  if (!matches.length) { list.style.display = "none"; return; }
+  list.innerHTML = matches.slice(0, 8).map(m => {
+    const idx = m.toLowerCase().indexOf(q);
+    const highlighted = esc(m.substring(0, idx)) + '<mark>' + esc(m.substring(idx, idx + q.length)) + '</mark>' + esc(m.substring(idx + q.length));
+    return '<div class="ac-item" onmousedown="pickSuggestion(this)">' + highlighted + '</div>';
+  }).join("");
+  list.style.display = "block";
+}
+
+function pickSuggestion(el) {
+  $("description").value = el.textContent;
+  $("acList").style.display = "none";
+  $("description").focus();
+}
+
+$("description").addEventListener("blur", function() {
+  setTimeout(() => $("acList").style.display = "none", 150);
+});
+
 function clearForm() {
   $("description").value = "";
+  $("acList").style.display = "none";
   $("addInfo").value = "";
   $("dcCode").value = "EVI01";
   document.getElementById("loc-DH1").checked = true;

@@ -30,6 +30,12 @@ Format: **vX.Y.Z**
 
 ## Version History
 
+### v0.3.0 (2026-04-15)
+**New Features:**
+- Auto-complete suggestions for description field based on previous entries
+- Highlights matching text in orange, shows up to 8 suggestions
+- Click a suggestion to fill the description field instantly
+
 ### v0.2.0 (2026-04-15)
 **New Features:**
 - Auto-detect Jira ticket numbers in descriptions and make them clickable links to CoreWeave Jira
