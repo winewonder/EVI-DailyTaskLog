@@ -485,7 +485,7 @@
 </div>
 
 <!-- Version Label -->
-<div class="version-label"><span class="alpha-badge">Alpha</span> v0.1.2</div>
+<div class="version-label"><span class="alpha-badge">Alpha</span> v0.2.0</div>
 
 <!-- Toast notification -->
 <div class="toast" id="toast"></div>
@@ -494,6 +494,7 @@
 const $ = id => document.getElementById(id);
 
 const TZ = "America/Chicago";
+const JIRA_URL = "https://coreweave.atlassian.net/browse/";
 
 function nowCST() {
   return new Date(new Date().toLocaleString("en-US", { timeZone: TZ }));
@@ -778,10 +779,10 @@ function renderTable(rows) {
       <td class="center">${r.id}</td>
       <td class="center">${r.entry_date}</td>
       <td class="center">${r.day_name}</td>
-      <td class="desc-col">${esc(r.description||"")}</td>
+      <td class="desc-col">${linkify(r.description||"")}</td>
       <td class="center">${r.location||""}</td>
       <td class="center">${r.dc_code||"EVI01"}</td>
-      <td class="info-col">${esc(r.add_info||"")}</td>
+      <td class="info-col">${linkify(r.add_info||"")}</td>
       <td class="center">${r.saved_at||""}</td>
       <td class="actions">
         <button class="act-btn act-dup" onclick="dupRecord(${r.id})">DUP</button>
@@ -793,6 +794,17 @@ function renderTable(rows) {
 }
 
 function esc(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+function linkify(s) {
+  let h = esc(s);
+  // Standard Jira keys: DO-103333, INGEST-1234, etc.
+  h = h.replace(/\b([A-Z]{2,}-\d+)\b/g, '<a href="' + JIRA_URL + '$1" target="_blank" style="color:var(--blue);font-weight:bold;text-decoration:underline;">$1</a>');
+  // Bare ticket numbers near "jira"/"ticket" keywords: "Jira Ticket 102783", "ticket no 102956"
+  h = h.replace(/((?:jira|ticket|tickes)\s*(?:#|no\.?\s*)?)\s*(\d{4,})/gi, function(m, prefix, num) {
+    return prefix + '<a href="' + JIRA_URL + 'DO-' + num + '" target="_blank" style="color:var(--blue);font-weight:bold;text-decoration:underline;">' + num + '</a>';
+  });
+  return h;
+}
 
 // ── Helpers ───────────────────────────────────────
 function setStatus(msg) { $("statusBar").textContent = msg; }
@@ -857,8 +869,8 @@ function loadCurrentWeek() {
       html += '<div class="day-card-row">';
       html += '<span class="day-card-num">' + (i+1) + '</span>';
       html += '<span class="day-card-loc">' + esc(t.location||"") + '</span>';
-      html += '<span class="day-card-desc">' + esc(t.description||"") + '</span>';
-      if (t.add_info) html += '<span class="day-card-info">' + esc(t.add_info) + '</span>';
+      html += '<span class="day-card-desc">' + linkify(t.description||"") + '</span>';
+      if (t.add_info) html += '<span class="day-card-info">' + linkify(t.add_info) + '</span>';
       html += '<span class="day-card-actions">'
             + '<button class="act-btn act-edit" onclick="editRecord(' + t.id + ')">EDIT</button>'
             + '<button class="act-btn act-del" onclick="deleteRecord(' + t.id + ')">DEL</button>'
@@ -948,8 +960,8 @@ function showWeeklySummary() {
       html += '<div class="day-task-row">';
       html += '<span class="task-loc">' + esc(t.location||"") + '</span>';
       html += '<span class="task-dc">' + esc(t.dc_code||"EVI01") + '</span>';
-      html += '<span class="task-desc">' + esc(t.description||"") + '</span>';
-      if (t.add_info) html += '<span class="task-info">' + esc(t.add_info) + '</span>';
+      html += '<span class="task-desc">' + linkify(t.description||"") + '</span>';
+      if (t.add_info) html += '<span class="task-info">' + linkify(t.add_info) + '</span>';
       html += '</div>';
     });
     html += '</div></div>';

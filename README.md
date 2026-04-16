@@ -30,6 +30,12 @@ Format: **vX.Y.Z**
 
 ## Version History
 
+### v0.2.0 (2026-04-15)
+**New Features:**
+- Auto-detect Jira ticket numbers in descriptions and make them clickable links to CoreWeave Jira
+- Supports standard keys (e.g., `DO-103333`) and bare numbers near "Jira"/"Ticket" keywords
+- Links appear in All Records table, Weekly View, and Weekly Summary modal
+
 ### v0.1.2 (2026-04-15)
 **Bug Fixes:**
 - Fixed date input text invisible in dark mode (font color matched dark background)
