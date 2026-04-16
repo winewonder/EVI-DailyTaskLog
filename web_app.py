@@ -143,6 +143,32 @@ def api_delete(record_id):
         conn.commit()
     return jsonify({"message": f"Record #{record_id} deleted."})
 
+@app.route("/api/export-json")
+def api_export_json():
+    with get_conn() as conn:
+        rows = conn.execute("SELECT * FROM tasks ORDER BY id").fetchall()
+    return jsonify({"tasks": rows_to_list(rows), "exported_at": datetime.now().isoformat()})
+
+@app.route("/api/import-json", methods=["POST"])
+def api_import_json():
+    data = request.json
+    tasks = data.get("tasks", [])
+    if not tasks:
+        return jsonify({"error": "No tasks to import"}), 400
+    count = 0
+    with get_conn() as conn:
+        for t in tasks:
+            conn.execute("""
+                INSERT INTO tasks (entry_date, day_name, description, location,
+                                   dc_code, add_info, week_number, year, saved_at)
+                VALUES (?,?,?,?,?,?,?,?,?)
+            """, (t["entry_date"], t["day_name"], t.get("description",""),
+                  t.get("location",""), t.get("dc_code","EVI01"), t.get("add_info",""),
+                  t.get("week_number",0), t.get("year",0), t.get("saved_at","")))
+            count += 1
+        conn.commit()
+    return jsonify({"message": f"Imported {count} record(s) successfully!"})
+
 @app.route("/api/weekly-summary")
 def api_weekly_summary():
     yr = int(request.args.get("year", date.today().year))
@@ -703,6 +729,9 @@ HTML_PAGE = r"""
     <button class="btn btn-blue" onclick="recallAll()">All Records</button>
     <button class="btn btn-save" onclick="showWeeklySummary()" style="margin-left:4px;">WEEKLY SUMMARY</button>
     <button class="btn btn-export" onclick="exportCSV()" style="margin-left:4px;">EXPORT CSV</button>
+    <button class="btn btn-export" onclick="exportJSON()" style="margin-left:4px;">EXPORT JSON</button>
+    <button class="btn btn-blue" onclick="$('importFile').click()" style="margin-left:4px;">IMPORT JSON</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
     <span style="margin-left:16px; font-weight:bold; color:var(--text);">Week #:</span>
     <input type="number" id="weekNum" min="1" max="53">
     <span style="font-weight:bold; color:var(--text);">Year:</span>
@@ -1266,6 +1295,41 @@ function exportCSV() {
   a.click();
   URL.revokeObjectURL(url);
   toast("CSV exported successfully!", "success");
+}
+
+// ── Export / Import JSON ─────────────────────────
+async function exportJSON() {
+  const res = await fetch("/api/export-json");
+  const data = await res.json();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "EVI_Tasks_" + new Date().toISOString().slice(0,10) + ".json";
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("JSON exported — use this file to import into the GitHub Pages version.", "success");
+}
+
+async function importJSON(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const text = await file.text();
+  let data;
+  try { data = JSON.parse(text); } catch(e) { toast("Invalid JSON file.", "error"); return; }
+  if (!data.tasks || !data.tasks.length) { toast("No tasks found in file.", "error"); return; }
+  if (!confirm("Import " + data.tasks.length + " record(s)? This will ADD to existing records.")) { input.value=""; return; }
+  const res = await fetch("/api/import-json", {
+    method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(data)
+  });
+  const result = await res.json();
+  if (res.ok) {
+    toast(result.message, "success");
+    refreshActiveTab();
+  } else {
+    toast(result.error || "Import failed", "error");
+  }
+  input.value = "";
 }
 
 // ── Quick Duplicate ──────────────────────────────

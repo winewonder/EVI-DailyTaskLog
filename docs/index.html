@@ -372,6 +372,9 @@
     <button class="btn btn-blue" onclick="recallAll()">All Records</button>
     <button class="btn btn-save" onclick="showWeeklySummary()" style="margin-left:4px;">WEEKLY SUMMARY</button>
     <button class="btn btn-export" onclick="exportCSV()" style="margin-left:4px;">EXPORT CSV</button>
+    <button class="btn btn-export" onclick="exportJSON()" style="margin-left:4px;">EXPORT JSON</button>
+    <button class="btn btn-blue" onclick="$('importFile').click()" style="margin-left:4px;">IMPORT JSON</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
     <span style="margin-left:16px; font-weight:bold; color:var(--text);">Week #:</span>
     <input type="number" id="weekNum" min="1" max="53">
     <span style="font-weight:bold; color:var(--text);">Year:</span>
@@ -1027,6 +1030,46 @@ function exportCSV() {
   a.click();
   URL.revokeObjectURL(url);
   toast("CSV exported successfully!", "success");
+}
+
+// ── Export / Import JSON ─────────────────────────
+function exportJSON() {
+  const tasks = loadTasks();
+  if (tasks.length === 0) { toast("No records to export.", "error"); return; }
+  const data = { tasks: tasks, exported_at: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "EVI_Tasks_" + new Date().toISOString().slice(0,10) + ".json";
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("JSON exported — " + tasks.length + " record(s).", "success");
+}
+
+function importJSON(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let data;
+    try { data = JSON.parse(e.target.result); } catch(err) { toast("Invalid JSON file.", "error"); return; }
+    if (!data.tasks || !data.tasks.length) { toast("No tasks found in file.", "error"); return; }
+    if (!confirm("Import " + data.tasks.length + " record(s)? This will ADD to existing records.")) { input.value=""; return; }
+    const existing = loadTasks();
+    let maxId = existing.length ? Math.max(...existing.map(t => t.id)) : 0;
+    data.tasks.forEach(t => {
+      maxId++;
+      t.id = maxId;
+      existing.push(t);
+    });
+    saveTasks(existing);
+    nextId = maxId + 1;
+    toast("Imported " + data.tasks.length + " record(s) successfully!", "success");
+    refreshActiveTab();
+    input.value = "";
+  };
+  reader.readAsText(file);
 }
 
 // ── Quick Duplicate ──────────────────────────────
