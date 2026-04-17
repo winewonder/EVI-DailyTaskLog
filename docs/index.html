@@ -280,9 +280,14 @@
 
   .version-label { position:fixed; bottom:10px; left:14px; font-size:13px; font-weight:bold;
                    color:#fff; letter-spacing:0.5px; z-index:100;
-                   cursor:pointer; background:var(--red); padding:4px 12px;
-                   border-radius:4px; transition:opacity 0.15s, transform 0.15s; border:none; }
-  .version-label:hover { opacity:0.88; transform:translateY(-1px); }
+                   cursor:pointer;
+                   background:linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+                   padding:4px 12px; border-radius:4px;
+                   transition:opacity 0.15s, transform 0.15s, box-shadow 0.15s;
+                   border:none; box-shadow:0 1px 3px rgba(0,0,0,0.25); }
+  .version-label:hover { opacity:0.92; transform:translateY(-1px); box-shadow:0 3px 8px rgba(0,0,0,0.3); }
+  .version-label .alpha-badge { background:var(--orange); color:#fff; padding:1px 8px;
+                                border-radius:3px; margin-right:4px; font-size:11px; }
 
   .version-history { display:flex; flex-direction:column; gap:10px; }
   .ver-card { border:1px solid var(--border-col); border-radius:6px; overflow:hidden; background:var(--card-bg); }
