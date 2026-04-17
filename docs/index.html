@@ -280,8 +280,24 @@
 
   .version-label { position:fixed; bottom:10px; left:14px; font-size:13px; font-weight:bold;
                    color:#fff; letter-spacing:0.5px; z-index:100;
-                   pointer-events:none; background:var(--red); padding:4px 12px;
-                   border-radius:4px; }
+                   cursor:pointer; background:var(--red); padding:4px 12px;
+                   border-radius:4px; transition:opacity 0.15s, transform 0.15s; border:none; }
+  .version-label:hover { opacity:0.88; transform:translateY(-1px); }
+
+  .version-history { display:flex; flex-direction:column; gap:10px; }
+  .ver-card { border:1px solid var(--border-col); border-radius:6px; overflow:hidden; background:var(--card-bg); }
+  .ver-head { background:var(--blue); color:#fff; padding:8px 14px; display:flex;
+              justify-content:space-between; align-items:center; gap:10px; }
+  .ver-tag { font-weight:bold; font-size:14px; letter-spacing:0.5px; }
+  .ver-tag.current { background:var(--orange); padding:2px 10px; border-radius:4px; }
+  .ver-date { font-size:12px; opacity:0.85; }
+  .ver-body { padding:10px 14px; background:var(--pale); }
+  .ver-sec-title { font-size:11px; font-weight:bold; letter-spacing:1px;
+                   color:var(--navy); margin:4px 0 4px; text-transform:uppercase; }
+  .ver-sec-title.fix { color:var(--red); }
+  .ver-body ul { margin:0 0 8px 20px; padding:0; }
+  .ver-body li { font-size:13px; line-height:1.5; color:var(--text); margin-bottom:3px; }
+  .ver-body li:last-child { margin-bottom:0; }
 
   .ac-wrap { flex:1; position:relative; }
   .ac-wrap textarea { width:100%; }
@@ -540,6 +556,22 @@
   </div>
 </div>
 
+<!-- Version History Modal -->
+<div class="modal-overlay" id="versionModal">
+  <div class="modal" style="max-width:720px;">
+    <div class="modal-header">
+      <h2>VERSION HISTORY</h2>
+      <button class="modal-close" onclick="closeVersionHistory()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="version-history" id="versionHistoryBody"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-clear" onclick="closeVersionHistory()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
 <!-- Templates Modal -->
 <div class="modal-overlay" id="templatesModal">
   <div class="modal" style="max-width:640px;">
@@ -681,7 +713,7 @@
 </div>
 
 <!-- Version Label -->
-<div class="version-label"><span class="alpha-badge">Beta</span> v0.4.0</div>
+<button type="button" class="version-label" onclick="openVersionHistory()" title="Click to view version history"><span class="alpha-badge">Beta</span> v0.4.0</button>
 
 <!-- Toast notification -->
 <div class="toast" id="toast"></div>
@@ -1468,6 +1500,7 @@ document.addEventListener("keydown", function(e) {
     else if ($("templatesModal").classList.contains("open")) closeTemplates();
     else if ($("bulkModal").classList.contains("open")) closeBulk();
     else if ($("recurringModal").classList.contains("open")) closeRecurring();
+    else if ($("versionModal").classList.contains("open")) closeVersionHistory();
   }
   if ((e.ctrlKey || e.metaKey) && e.key === "e") {
     e.preventDefault();
@@ -1481,6 +1514,99 @@ document.addEventListener("keydown", function(e) {
     }
   }
 });
+
+// ══════════════════════════════════════════════════
+// Version History
+// ══════════════════════════════════════════════════
+const CURRENT_VERSION = "v0.4.0";
+const VERSION_HISTORY = [
+  { version: "v0.4.0", date: "2026-04-17", features: [
+      "Task Templates — save the current form (location, DC code, description, add. info) as a named preset; one-click load to refill the form",
+      "Bulk Entry — enter multiple descriptions (one per line) with shared date, location, DC code and add. info; creates N records in one save",
+      "Recurring Tasks — define daily or weekly (pick days) rules that auto-generate records from the start date onward; rules can be paused/resumed",
+      "Version History — clickable version badge opens full change log",
+      "Copy-to-clipboard icon on the weekly AI summary"
+  ]},
+  { version: "v0.3.0", date: "2026-04-15", features: [
+      "Auto-complete suggestions for description field based on previous entries",
+      "Highlights matching text in orange, shows up to 8 suggestions",
+      "Click a suggestion to fill the description field instantly"
+  ]},
+  { version: "v0.2.0", date: "2026-04-15", features: [
+      "Auto-detect Jira ticket numbers in descriptions and make them clickable links to CoreWeave Jira",
+      "Supports standard keys (e.g., DO-103333) and bare numbers near \"Jira\"/\"Ticket\" keywords",
+      "Links appear in All Records table, Weekly View, and Weekly Summary modal"
+  ]},
+  { version: "v0.1.2", date: "2026-04-15", fixes: [
+      "Fixed date input text invisible in dark mode (font color matched dark background)"
+  ]},
+  { version: "v0.1.1", date: "2026-04-15",
+    fixes: [
+      "Fixed date picker showing wrong day (tomorrow instead of today) due to UTC/local timezone mismatch",
+      "Fixed toISOString() returning UTC date instead of local date across all date operations",
+      "Fixed stats dashboard showing incorrect \"today\" and \"this week\" counts"
+    ],
+    features: [
+      "Added CST (America/Chicago) timezone enforcement for all dates and timestamps",
+      "Added weekly view navigation with Prev/Next buttons and Today shortcut",
+      "Added data.json in repo — records auto-load from git file into localStorage on page load",
+      "Renamed \"Current Week\" tab to \"Weekly View\" with browse capability"
+    ]
+  },
+  { version: "v0.1.0", date: "2026-04-13", features: [
+      "Search and filter across all records",
+      "Export to CSV",
+      "Duplicate record to quickly create similar entries",
+      "Stats dashboard (today, this week, all time)",
+      "Keyboard shortcuts (Ctrl+S, Ctrl+E, Ctrl+F, Esc)",
+      "Import/Export JSON for transferring records between devices"
+  ]},
+  { version: "v0.0.3", date: "2026-04-12", features: [
+      "Current Week tab view with day-by-day card layout",
+      "\"Others\" custom location option"
+  ]},
+  { version: "v0.0.2", date: "2026-04-11", features: [
+      "6-theme switcher (Classic Blue, Dark, Emerald, Sunset, Purple, Steel)",
+      "Inline edit and delete records via modal",
+      "Weekly summary modal with AI-generated insights",
+      "Fixed record ID sequencing"
+  ]},
+  { version: "v0.0.1", date: "2026-04-10", features: [
+      "Initial release — daily task logging with date, location, DC code, description, and additional info",
+      "GitHub Pages static site with localStorage backend",
+      "Table view with all records",
+      "Clipboard favicon for browser tab identity"
+  ]}
+];
+
+function openVersionHistory() {
+  renderVersionHistory();
+  $("versionModal").classList.add("open");
+}
+function closeVersionHistory() { $("versionModal").classList.remove("open"); }
+
+function renderVersionHistory() {
+  const container = $("versionHistoryBody");
+  container.innerHTML = VERSION_HISTORY.map(v => {
+    const current = v.version === CURRENT_VERSION;
+    let body = "";
+    if (v.features && v.features.length) {
+      body += '<div class="ver-sec-title">New / Improved</div><ul>'
+            + v.features.map(f => '<li>' + esc(f) + '</li>').join("") + '</ul>';
+    }
+    if (v.fixes && v.fixes.length) {
+      body += '<div class="ver-sec-title fix">Bug Fixes</div><ul>'
+            + v.fixes.map(f => '<li>' + esc(f) + '</li>').join("") + '</ul>';
+    }
+    return '<div class="ver-card">'
+      + '<div class="ver-head">'
+      + '<span class="ver-tag' + (current ? ' current' : '') + '">' + esc(v.version) + (current ? ' · current' : '') + '</span>'
+      + '<span class="ver-date">' + esc(v.date) + '</span>'
+      + '</div>'
+      + '<div class="ver-body">' + body + '</div>'
+      + '</div>';
+  }).join("");
+}
 
 // ══════════════════════════════════════════════════
 // Task Templates
@@ -1815,6 +1941,7 @@ document.addEventListener("click", function(e) {
   if (e.target.id === "templatesModal") closeTemplates();
   if (e.target.id === "bulkModal") closeBulk();
   if (e.target.id === "recurringModal") closeRecurring();
+  if (e.target.id === "versionModal") closeVersionHistory();
 });
 
 init();
