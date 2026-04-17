@@ -30,6 +30,12 @@ Format: **vX.Y.Z**
 
 ## Version History
 
+### v0.4.0 (2026-04-17)
+**New Features:**
+- Task Templates — save the current form (location, DC code, description, add. info) as a named preset; one-click load to refill the form
+- Bulk Entry — enter multiple descriptions (one per line) with a shared date, location, DC code and add. info; creates N records in one save
+- Recurring Tasks — define daily or weekly (pick days) rules that auto-generate records from the start date onward each time the app loads; rules can be paused/resumed
+
 ### v0.3.0 (2026-04-15)
 **New Features:**
 - Auto-complete suggestions for description field based on previous entries

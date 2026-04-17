@@ -291,6 +291,37 @@
   kbd { background:var(--pale); border:1px solid var(--input-border); border-radius:3px;
         padding:1px 5px; font-size:10px; font-family:monospace; }
 
+  /* Tools buttons + template / bulk / recurring modals */
+  .divider-v { width:1px; align-self:stretch; background:var(--border-col); margin:0 4px; min-height:20px; }
+  .tpl-list, .rule-list { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+  .tpl-item, .rule-item { background:var(--pale); border:1px solid var(--border-col); border-radius:6px; padding:10px 14px; }
+  .tpl-item { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .tpl-item-info { flex:1; overflow:hidden; min-width:0; }
+  .tpl-item-name, .rule-item-name { font-weight:bold; color:var(--navy); font-size:14px; }
+  .tpl-item-desc, .rule-item-meta { font-size:12px; color:var(--text); opacity:0.75; margin-top:3px;
+                                    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tpl-empty { text-align:center; padding:20px; color:var(--text); opacity:0.5; font-style:italic; }
+  .rule-item-head { display:flex; align-items:center; gap:8px; }
+  .rule-item-head .rule-item-name { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+  .rule-item-badge { background:var(--green); color:#fff; padding:2px 8px; border-radius:3px;
+                     font-size:11px; font-weight:bold; white-space:nowrap; }
+  .rule-item-badge.disabled { background:#888; }
+  .section-title { font-weight:bold; color:var(--navy); font-size:13px; letter-spacing:0.5px;
+                   margin:16px 0 10px; padding-top:14px; border-top:1px solid var(--border-col); }
+  .dow-checks { display:flex; gap:6px; flex-wrap:wrap; flex:1; }
+  .dow-checks label { background:var(--card-bg); color:var(--text); padding:5px 10px;
+                      border:2px solid var(--blue); border-radius:4px; cursor:pointer;
+                      font-size:12px; font-weight:bold; min-width:auto; }
+  .dow-checks input[type="checkbox"] { display:none; }
+  .dow-checks input[type="checkbox"]:checked + label { background:var(--blue); color:#fff; }
+  .freq-radios { display:flex; gap:8px; flex:1; }
+  .freq-radios label { background:var(--card-bg); color:var(--text); padding:6px 14px;
+                       border:2px solid var(--blue); border-radius:4px; cursor:pointer;
+                       font-size:13px; min-width:auto; }
+  .freq-radios input[type="radio"] { display:none; }
+  .freq-radios input[type="radio"]:checked + label { background:var(--blue); color:#fff; }
+  .bulk-hint { font-size:11px; color:var(--text); opacity:0.6; margin:2px 0 8px 118px; }
+
   @media print {
     body * { visibility: hidden; }
     .modal, .modal * { visibility: visible; }
@@ -358,6 +389,10 @@
       <div class="btn-row">
         <button class="btn btn-save" onclick="saveEntry()">SAVE ENTRY <span class="kbd-hint"><kbd>Ctrl</kbd>+<kbd>S</kbd></span></button>
         <button class="btn btn-clear" onclick="clearForm()">CLEAR FORM</button>
+        <span class="divider-v"></span>
+        <button class="btn btn-blue" onclick="openTemplates()">TEMPLATES</button>
+        <button class="btn btn-blue" onclick="openBulk()">BULK ENTRY</button>
+        <button class="btn btn-blue" onclick="openRecurring()">RECURRING</button>
       </div>
     </div>
   </div>
@@ -498,8 +533,148 @@
   </div>
 </div>
 
+<!-- Templates Modal -->
+<div class="modal-overlay" id="templatesModal">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-header">
+      <h2>TASK TEMPLATES</h2>
+      <button class="modal-close" onclick="closeTemplates()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="tpl-list" id="tplList"></div>
+      <div class="section-title">SAVE CURRENT FORM AS TEMPLATE</div>
+      <div class="form-row">
+        <label>Name</label>
+        <input type="text" id="tplName" placeholder="e.g. Morning walkthrough">
+      </div>
+      <div class="bulk-hint">Captures current location, DC code, description and additional info.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-save" onclick="saveCurrentAsTemplate()">SAVE TEMPLATE</button>
+      <button class="btn btn-clear" onclick="closeTemplates()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk Entry Modal -->
+<div class="modal-overlay" id="bulkModal">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-header">
+      <h2>BULK ENTRY</h2>
+      <button class="modal-close" onclick="closeBulk()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label>Date</label>
+        <input type="date" id="bulkDate" style="flex:1; padding:8px; font-size:14px; border:1px solid var(--input-border); border-radius:4px; background:var(--input-bg); color:var(--text);">
+      </div>
+      <div class="form-row">
+        <label>Location</label>
+        <div class="radio-group">
+          <input type="radio" name="bulkLocation" id="bulk-loc-DH1" value="DH1" checked><label for="bulk-loc-DH1">DH1</label>
+          <input type="radio" name="bulkLocation" id="bulk-loc-DH2" value="DH2"><label for="bulk-loc-DH2">DH2</label>
+          <input type="radio" name="bulkLocation" id="bulk-loc-DH3" value="DH3"><label for="bulk-loc-DH3">DH3</label>
+          <input type="radio" name="bulkLocation" id="bulk-loc-DH4" value="DH4"><label for="bulk-loc-DH4">DH4</label>
+          <input type="radio" name="bulkLocation" id="bulk-loc-DH5" value="DH5"><label for="bulk-loc-DH5">DH5</label>
+          <input type="radio" name="bulkLocation" id="bulk-loc-DH6" value="DH6"><label for="bulk-loc-DH6">DH6</label>
+          <input type="radio" name="bulkLocation" id="bulk-loc-Other" value="Other"><label for="bulk-loc-Other">Others</label>
+          <input type="text" id="bulkLocOther" placeholder="Enter location..." style="width:140px; padding:6px 8px; font-size:13px; border:1px solid var(--input-border); border-radius:4px; background:var(--input-bg); color:var(--text); display:none;">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>DC Code</label>
+        <input type="text" id="bulkDcCode" value="EVI01" style="max-width:160px;">
+      </div>
+      <div class="form-row">
+        <label>Descriptions</label>
+        <textarea id="bulkDescriptions" rows="6" placeholder="One task per line..."></textarea>
+      </div>
+      <div class="bulk-hint">Each non-empty line becomes a separate record with the settings above.</div>
+      <div class="form-row">
+        <label>Add. Info</label>
+        <textarea id="bulkAddInfo" rows="2" placeholder="Shared across all records (optional)"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-save" onclick="saveBulkEntries()">SAVE ALL</button>
+      <button class="btn btn-clear" onclick="closeBulk()">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- Recurring Tasks Modal -->
+<div class="modal-overlay" id="recurringModal">
+  <div class="modal" style="max-width:720px;">
+    <div class="modal-header">
+      <h2>RECURRING TASKS</h2>
+      <button class="modal-close" onclick="closeRecurring()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="rule-list" id="ruleList"></div>
+      <div class="section-title">ADD NEW RULE</div>
+      <div class="form-row">
+        <label>Name</label>
+        <input type="text" id="ruleName" placeholder="e.g. Morning walkthrough">
+      </div>
+      <div class="form-row">
+        <label>Location</label>
+        <div class="radio-group">
+          <input type="radio" name="ruleLocation" id="rule-loc-DH1" value="DH1" checked><label for="rule-loc-DH1">DH1</label>
+          <input type="radio" name="ruleLocation" id="rule-loc-DH2" value="DH2"><label for="rule-loc-DH2">DH2</label>
+          <input type="radio" name="ruleLocation" id="rule-loc-DH3" value="DH3"><label for="rule-loc-DH3">DH3</label>
+          <input type="radio" name="ruleLocation" id="rule-loc-DH4" value="DH4"><label for="rule-loc-DH4">DH4</label>
+          <input type="radio" name="ruleLocation" id="rule-loc-DH5" value="DH5"><label for="rule-loc-DH5">DH5</label>
+          <input type="radio" name="ruleLocation" id="rule-loc-DH6" value="DH6"><label for="rule-loc-DH6">DH6</label>
+          <input type="radio" name="ruleLocation" id="rule-loc-Other" value="Other"><label for="rule-loc-Other">Others</label>
+          <input type="text" id="ruleLocOther" placeholder="Enter location..." style="width:140px; padding:6px 8px; font-size:13px; border:1px solid var(--input-border); border-radius:4px; background:var(--input-bg); color:var(--text); display:none;">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>DC Code</label>
+        <input type="text" id="ruleDcCode" value="EVI01" style="max-width:160px;">
+      </div>
+      <div class="form-row">
+        <label>Description</label>
+        <textarea id="ruleDescription" rows="2" placeholder="Task description..."></textarea>
+      </div>
+      <div class="form-row">
+        <label>Add. Info</label>
+        <textarea id="ruleAddInfo" rows="2" placeholder="Optional additional information..."></textarea>
+      </div>
+      <div class="form-row">
+        <label>Frequency</label>
+        <div class="freq-radios">
+          <input type="radio" name="ruleFreq" id="ruleFreq-daily" value="daily" checked onchange="updateDowVisibility()"><label for="ruleFreq-daily">Daily</label>
+          <input type="radio" name="ruleFreq" id="ruleFreq-weekly" value="weekly" onchange="updateDowVisibility()"><label for="ruleFreq-weekly">Weekly</label>
+        </div>
+      </div>
+      <div class="form-row" id="ruleDowRow" style="display:none;">
+        <label>Days</label>
+        <div class="dow-checks">
+          <input type="checkbox" id="dow-1"><label for="dow-1">Mon</label>
+          <input type="checkbox" id="dow-2"><label for="dow-2">Tue</label>
+          <input type="checkbox" id="dow-3"><label for="dow-3">Wed</label>
+          <input type="checkbox" id="dow-4"><label for="dow-4">Thu</label>
+          <input type="checkbox" id="dow-5"><label for="dow-5">Fri</label>
+          <input type="checkbox" id="dow-6"><label for="dow-6">Sat</label>
+          <input type="checkbox" id="dow-0"><label for="dow-0">Sun</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Start Date</label>
+        <input type="date" id="ruleStartDate" style="flex:1; padding:8px; font-size:14px; border:1px solid var(--input-border); border-radius:4px; background:var(--input-bg); color:var(--text);">
+      </div>
+      <div class="bulk-hint">Records auto-generate from start date onward on each app load.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-save" onclick="saveRuleNew()">SAVE RULE</button>
+      <button class="btn btn-clear" onclick="closeRecurring()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
 <!-- Version Label -->
-<div class="version-label"><span class="alpha-badge">Alpha</span> v0.3.0</div>
+<div class="version-label"><span class="alpha-badge">Alpha</span> v0.4.0</div>
 
 <!-- Toast notification -->
 <div class="toast" id="toast"></div>
@@ -635,9 +810,11 @@ function init() {
   // Load records from data.json and merge into localStorage
   fetch("data.json").then(r => r.json()).then(data => {
     if (data.tasks && data.tasks.length) mergeRemoteTasks(data.tasks);
+    processRecurringTasks();
     recallAll();
     updateStats();
   }).catch(() => {
+    processRecurringTasks();
     recallAll();
     updateStats();
   });
@@ -685,6 +862,8 @@ function setupOtherToggle(radioName, inputId) {
 }
 setupOtherToggle("location", "locOther");
 setupOtherToggle("editLocation", "editLocOther");
+setupOtherToggle("bulkLocation", "bulkLocOther");
+setupOtherToggle("ruleLocation", "ruleLocOther");
 
 // ── Save ──────────────────────────────────────────
 function saveEntry() {
@@ -1242,6 +1421,9 @@ document.addEventListener("keydown", function(e) {
   if (e.key === "Escape") {
     if ($("editModal").classList.contains("open")) closeEdit();
     else if ($("summaryModal").classList.contains("open")) closeSummary();
+    else if ($("templatesModal").classList.contains("open")) closeTemplates();
+    else if ($("bulkModal").classList.contains("open")) closeBulk();
+    else if ($("recurringModal").classList.contains("open")) closeRecurring();
   }
   if ((e.ctrlKey || e.metaKey) && e.key === "e") {
     e.preventDefault();
@@ -1254,6 +1436,341 @@ document.addEventListener("keydown", function(e) {
       $("searchInput").select();
     }
   }
+});
+
+// ══════════════════════════════════════════════════
+// Task Templates
+// ══════════════════════════════════════════════════
+const TEMPLATES_KEY = "evi_templates";
+
+function loadTemplates() {
+  const raw = localStorage.getItem(TEMPLATES_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+function saveTemplatesToStorage(tpls) { localStorage.setItem(TEMPLATES_KEY, JSON.stringify(tpls)); }
+
+function openTemplates() {
+  renderTemplatesList();
+  $("tplName").value = "";
+  $("templatesModal").classList.add("open");
+}
+function closeTemplates() { $("templatesModal").classList.remove("open"); }
+
+function renderTemplatesList() {
+  const tpls = loadTemplates();
+  const container = $("tplList");
+  if (!tpls.length) {
+    container.innerHTML = '<div class="tpl-empty">No templates yet. Fill the form and save below.</div>';
+    return;
+  }
+  container.innerHTML = tpls.map(t => {
+    const descPreview = (t.description || "").substring(0, 80) + ((t.description || "").length > 80 ? "…" : "");
+    return '<div class="tpl-item">'
+      + '<div class="tpl-item-info">'
+      + '<div class="tpl-item-name">' + esc(t.name) + '</div>'
+      + '<div class="tpl-item-desc">' + esc(t.location) + ' / ' + esc(t.dc_code || "EVI01") + ' — ' + esc(descPreview) + '</div>'
+      + '</div>'
+      + '<div style="display:flex; gap:6px;">'
+      + '<button class="act-btn act-edit" onclick="loadTemplate(' + t.id + ')">LOAD</button>'
+      + '<button class="act-btn act-del" onclick="deleteTemplate(' + t.id + ')">DEL</button>'
+      + '</div>'
+      + '</div>';
+  }).join("");
+}
+
+function saveCurrentAsTemplate() {
+  const name = $("tplName").value.trim();
+  if (!name) { toast("Template name required.", "error"); return; }
+  const tpls = loadTemplates();
+  const nextTplId = tpls.length ? Math.max(...tpls.map(t => t.id)) + 1 : 1;
+  tpls.push({
+    id: nextTplId,
+    name: name,
+    location: getLocation(),
+    dc_code: $("dcCode").value.trim() || "EVI01",
+    description: $("description").value.trim(),
+    add_info: $("addInfo").value.trim()
+  });
+  saveTemplatesToStorage(tpls);
+  $("tplName").value = "";
+  renderTemplatesList();
+  toast("Template '" + name + "' saved.", "success");
+}
+
+function loadTemplate(id) {
+  const tpl = loadTemplates().find(t => t.id === id);
+  if (!tpl) return;
+  const knownLocs = ["DH1","DH2","DH3","DH4","DH5","DH6"];
+  if (knownLocs.includes(tpl.location)) {
+    document.getElementById("loc-" + tpl.location).checked = true;
+    $("locOther").style.display = "none";
+    $("locOther").value = "";
+  } else {
+    document.getElementById("loc-Other").checked = true;
+    $("locOther").style.display = "inline-block";
+    $("locOther").value = tpl.location;
+  }
+  $("dcCode").value = tpl.dc_code || "EVI01";
+  $("description").value = tpl.description || "";
+  $("addInfo").value = tpl.add_info || "";
+  closeTemplates();
+  toast("Template '" + tpl.name + "' applied.", "success");
+  $("description").focus();
+}
+
+function deleteTemplate(id) {
+  const tpl = loadTemplates().find(t => t.id === id);
+  if (!tpl) return;
+  if (!confirm("Delete template '" + tpl.name + "'?")) return;
+  saveTemplatesToStorage(loadTemplates().filter(t => t.id !== id));
+  renderTemplatesList();
+  toast("Template deleted.", "success");
+}
+
+// ══════════════════════════════════════════════════
+// Bulk Entry
+// ══════════════════════════════════════════════════
+function openBulk() {
+  $("bulkDate").value = $("entryDate").value || localDateStr();
+  $("bulkDcCode").value = "EVI01";
+  $("bulkDescriptions").value = "";
+  $("bulkAddInfo").value = "";
+  document.getElementById("bulk-loc-DH1").checked = true;
+  $("bulkLocOther").style.display = "none";
+  $("bulkLocOther").value = "";
+  $("bulkModal").classList.add("open");
+}
+function closeBulk() { $("bulkModal").classList.remove("open"); }
+
+function getBulkLocation() {
+  const checked = document.querySelector('input[name="bulkLocation"]:checked');
+  if (checked && checked.value === "Other") return $("bulkLocOther").value.trim() || "Other";
+  return checked ? checked.value : "DH1";
+}
+
+function saveBulkEntries() {
+  const date = $("bulkDate").value;
+  if (!date) { toast("Please pick a date.", "error"); return; }
+  const lines = $("bulkDescriptions").value.split("\n").map(s => s.trim()).filter(Boolean);
+  if (!lines.length) { toast("Please enter at least one description.", "error"); return; }
+  const location = getBulkLocation();
+  const dc = $("bulkDcCode").value.trim() || "EVI01";
+  const info = $("bulkAddInfo").value.trim();
+  lines.forEach(desc => addTask(date, desc, location, dc, info));
+  toast(lines.length + " record(s) saved!", "success");
+  closeBulk();
+  refreshActiveTab();
+}
+
+// ══════════════════════════════════════════════════
+// Recurring Tasks
+// ══════════════════════════════════════════════════
+const RECURRING_KEY = "evi_recurring";
+const DOW_LABELS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+function loadRules() {
+  const raw = localStorage.getItem(RECURRING_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+function saveRules(rules) { localStorage.setItem(RECURRING_KEY, JSON.stringify(rules)); }
+
+function openRecurring() {
+  renderRulesList();
+  resetRuleForm();
+  $("recurringModal").classList.add("open");
+}
+function closeRecurring() { $("recurringModal").classList.remove("open"); }
+
+function renderRulesList() {
+  const rules = loadRules();
+  const container = $("ruleList");
+  if (!rules.length) {
+    container.innerHTML = '<div class="tpl-empty">No recurring rules. Add one below.</div>';
+    return;
+  }
+  container.innerHTML = rules.map(r => {
+    let freq = "Daily";
+    if (r.frequency === "weekly") {
+      const days = (r.days_of_week || []).slice().sort().map(d => DOW_LABELS[d]).join(", ");
+      freq = "Weekly: " + (days || "(no days)");
+    }
+    const enabled = r.enabled !== false;
+    const badge = enabled
+      ? '<span class="rule-item-badge">ACTIVE</span>'
+      : '<span class="rule-item-badge disabled">PAUSED</span>';
+    return '<div class="rule-item">'
+      + '<div class="rule-item-head">'
+      + '<span class="rule-item-name">' + esc(r.name) + '</span>'
+      + badge
+      + '<button class="act-btn act-edit" onclick="toggleRule(' + r.id + ')">' + (enabled ? 'PAUSE' : 'RESUME') + '</button>'
+      + '<button class="act-btn act-del" onclick="deleteRule(' + r.id + ')">DEL</button>'
+      + '</div>'
+      + '<div class="rule-item-meta">' + esc(r.location) + ' / ' + esc(r.dc_code || 'EVI01') + ' — ' + esc(r.description) + '</div>'
+      + '<div class="rule-item-meta">' + esc(freq) + ' · Start: ' + esc(r.start_date) + '</div>'
+      + '</div>';
+  }).join("");
+}
+
+function resetRuleForm() {
+  $("ruleName").value = "";
+  $("ruleDcCode").value = "EVI01";
+  $("ruleDescription").value = "";
+  $("ruleAddInfo").value = "";
+  document.getElementById("rule-loc-DH1").checked = true;
+  $("ruleLocOther").style.display = "none";
+  $("ruleLocOther").value = "";
+  document.getElementById("ruleFreq-daily").checked = true;
+  $("ruleStartDate").value = localDateStr();
+  [0,1,2,3,4,5,6].forEach(i => {
+    const cb = document.getElementById("dow-" + i);
+    if (cb) cb.checked = (i >= 1 && i <= 5);
+  });
+  updateDowVisibility();
+}
+
+function updateDowVisibility() {
+  const sel = document.querySelector('input[name="ruleFreq"]:checked');
+  const weekly = sel && sel.value === "weekly";
+  $("ruleDowRow").style.display = weekly ? "flex" : "none";
+}
+
+function getRuleLocation() {
+  const checked = document.querySelector('input[name="ruleLocation"]:checked');
+  if (checked && checked.value === "Other") return $("ruleLocOther").value.trim() || "Other";
+  return checked ? checked.value : "DH1";
+}
+
+function saveRuleNew() {
+  const name = $("ruleName").value.trim();
+  const desc = $("ruleDescription").value.trim();
+  const start = $("ruleStartDate").value;
+  if (!name) { toast("Rule name required.", "error"); return; }
+  if (!desc) { toast("Description required.", "error"); return; }
+  if (!start) { toast("Start date required.", "error"); return; }
+  const freq = document.querySelector('input[name="ruleFreq"]:checked').value;
+  const dow = [];
+  if (freq === "weekly") {
+    [0,1,2,3,4,5,6].forEach(i => {
+      if (document.getElementById("dow-" + i).checked) dow.push(i);
+    });
+    if (!dow.length) { toast("Select at least one day of week.", "error"); return; }
+  }
+  const rules = loadRules();
+  const nextRuleId = rules.length ? Math.max(...rules.map(r => r.id)) + 1 : 1;
+  rules.push({
+    id: nextRuleId,
+    name: name,
+    description: desc,
+    location: getRuleLocation(),
+    dc_code: $("ruleDcCode").value.trim() || "EVI01",
+    add_info: $("ruleAddInfo").value.trim(),
+    frequency: freq,
+    days_of_week: dow,
+    start_date: start,
+    last_generated: null,
+    enabled: true
+  });
+  saveRules(rules);
+  toast("Rule '" + name + "' created.", "success");
+  resetRuleForm();
+  renderRulesList();
+  processRecurringTasks();
+}
+
+function toggleRule(id) {
+  const rules = loadRules();
+  const r = rules.find(x => x.id === id);
+  if (!r) return;
+  r.enabled = !(r.enabled !== false);
+  saveRules(rules);
+  renderRulesList();
+  if (r.enabled) processRecurringTasks();
+  else toast("Rule '" + r.name + "' paused.", "success");
+}
+
+function deleteRule(id) {
+  const r = loadRules().find(x => x.id === id);
+  if (!r) return;
+  if (!confirm("Delete rule '" + r.name + "'?\nAlready-generated records are kept.")) return;
+  saveRules(loadRules().filter(x => x.id !== id));
+  renderRulesList();
+  toast("Rule deleted.", "success");
+}
+
+function addTaskFromRule(rule, entry_date) {
+  const tasks = loadTasks();
+  const d = new Date(entry_date + "T00:00:00");
+  const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const now = nowCST();
+  const record = {
+    id: nextId++,
+    entry_date: entry_date,
+    day_name: dayNames[d.getDay()],
+    description: rule.description,
+    location: rule.location,
+    dc_code: rule.dc_code || "EVI01",
+    add_info: rule.add_info || "",
+    week_number: getWeekNumber(d),
+    year: d.getFullYear(),
+    recurring_id: rule.id,
+    saved_at: now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-"
+              + String(now.getDate()).padStart(2,"0") + " " + String(now.getHours()).padStart(2,"0")
+              + ":" + String(now.getMinutes()).padStart(2,"0") + ":" + String(now.getSeconds()).padStart(2,"0"),
+  };
+  tasks.push(record);
+  saveTasks(tasks);
+  return record.id;
+}
+
+function processRecurringTasks() {
+  const rules = loadRules();
+  if (!rules.length) return 0;
+  const todayStr = localDateStr();
+  const todayDate = new Date(todayStr + "T00:00:00");
+  const allTasks = loadTasks();
+  const existingKeys = new Set(
+    allTasks.filter(t => t.recurring_id).map(t => t.recurring_id + "|" + t.entry_date)
+  );
+  let generated = 0;
+  rules.forEach(rule => {
+    if (rule.enabled === false) return;
+    let d;
+    if (rule.last_generated) {
+      d = new Date(rule.last_generated + "T00:00:00");
+      d.setDate(d.getDate() + 1);
+    } else {
+      d = new Date(rule.start_date + "T00:00:00");
+    }
+    while (d <= todayDate) {
+      const dateStr = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+      const dow = d.getDay();
+      const match = rule.frequency === "daily"
+        || (rule.frequency === "weekly" && Array.isArray(rule.days_of_week) && rule.days_of_week.includes(dow));
+      if (match) {
+        const key = rule.id + "|" + dateStr;
+        if (!existingKeys.has(key)) {
+          addTaskFromRule(rule, dateStr);
+          existingKeys.add(key);
+          generated++;
+        }
+      }
+      d.setDate(d.getDate() + 1);
+    }
+    rule.last_generated = todayStr;
+  });
+  saveRules(rules);
+  if (generated) {
+    toast("Auto-generated " + generated + " recurring task record(s).", "success");
+    refreshActiveTab();
+  }
+  return generated;
+}
+
+// Close new modals on overlay click
+document.addEventListener("click", function(e) {
+  if (e.target.id === "templatesModal") closeTemplates();
+  if (e.target.id === "bulkModal") closeBulk();
+  if (e.target.id === "recurringModal") closeRecurring();
 });
 
 init();
