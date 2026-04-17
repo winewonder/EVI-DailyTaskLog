@@ -67,6 +67,26 @@
     --modal-bg: #fff; --border-col: #cbd5e1;
     --gradient-start: #1e293b; --gradient-end: #475569;
   }
+  [data-theme="rose"] {
+    --navy: #831843; --blue: #be185d; --ltblue: #fce7f3;
+    --pale: #fdf2f8; --orange: #ea580c; --green: #16a34a;
+    --red: #dc2626; --warn-bg: #fef3c7; --green-bg: #dcfce7;
+    --bg: #fff1f7; --text: #500724; --card-bg: #fff;
+    --input-bg: #fdf2f8; --input-border: #f9a8d4;
+    --row-even: #fce7f3; --row-odd: #fff; --row-hover: #fbcfe8;
+    --modal-bg: #fff; --border-col: #f9a8d4;
+    --gradient-start: #831843; --gradient-end: #be185d;
+  }
+  [data-theme="teal"] {
+    --navy: #134e4a; --blue: #0891b2; --ltblue: #cffafe;
+    --pale: #ecfeff; --orange: #ea580c; --green: #10b981;
+    --red: #dc2626; --warn-bg: #fef3c7; --green-bg: #d1fae5;
+    --bg: #f0fdfa; --text: #134e4a; --card-bg: #fff;
+    --input-bg: #ecfeff; --input-border: #67e8f9;
+    --row-even: #cffafe; --row-odd: #fff; --row-hover: #a5f3fc;
+    --modal-bg: #fff; --border-col: #67e8f9;
+    --gradient-start: #134e4a; --gradient-end: #0891b2;
+  }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: Arial, sans-serif; background: var(--bg); color: var(--text);
@@ -608,6 +628,14 @@
           <div class="theme-option" data-theme="steel" onclick="setTheme('steel')">
             <div class="theme-dot" style="background:linear-gradient(135deg,#1e293b,#475569);"></div>
             <span class="theme-name">Steel</span>
+          </div>
+          <div class="theme-option" data-theme="rose" onclick="setTheme('rose')">
+            <div class="theme-dot" style="background:linear-gradient(135deg,#831843,#be185d);"></div>
+            <span class="theme-name">Rose</span>
+          </div>
+          <div class="theme-option" data-theme="teal" onclick="setTheme('teal')">
+            <div class="theme-dot" style="background:linear-gradient(135deg,#134e4a,#0891b2);"></div>
+            <span class="theme-name">Teal</span>
           </div>
         </div>
       </div>
