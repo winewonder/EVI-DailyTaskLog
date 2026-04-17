@@ -803,7 +803,7 @@
 </div>
 
 <!-- Version Label -->
-<button type="button" class="version-label" onclick="openVersionHistory()" title="Click to view version history"><span class="alpha-badge">Beta</span> v0.4.1</button>
+<button type="button" class="version-label" onclick="openVersionHistory()" title="Click to view version history"><span class="alpha-badge">Beta</span> v0.4.2</button>
 
 <!-- Toast notification -->
 <div class="toast" id="toast"></div>
@@ -1609,8 +1609,12 @@ document.addEventListener("keydown", function(e) {
 // ══════════════════════════════════════════════════
 // Version History
 // ══════════════════════════════════════════════════
-const CURRENT_VERSION = "v0.4.1";
+const CURRENT_VERSION = "v0.4.2";
 const VERSION_HISTORY = [
+  { version: "v0.4.2", date: "2026-04-17", features: [
+      "Added two new themes: Rose (pink/magenta) and Teal (cyan/teal)",
+      "Settings modal now shows 8 theme tiles"
+  ]},
   { version: "v0.4.1", date: "2026-04-17", features: [
       "Version badge is now clickable and opens a scrollable Version History modal",
       "Copy-to-clipboard icon on the weekly AI summary (top-right of the AI SUMMARY box)",

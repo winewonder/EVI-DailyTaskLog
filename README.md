@@ -30,6 +30,11 @@ Format: **vX.Y.Z**
 
 ## Version History
 
+### v0.4.2 (2026-04-17)
+**New Features:**
+- Added two new themes: Rose (pink/magenta) and Teal (cyan/teal)
+- Settings modal now shows 8 theme tiles
+
 ### v0.4.1 (2026-04-17)
 **New Features:**
 - Version badge is now clickable and opens a scrollable Version History modal
