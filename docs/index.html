@@ -193,6 +193,13 @@
   .ai-summary-box::before { content: "AI SUMMARY"; position: absolute; top: -10px; left: 16px;
                              background: var(--orange); color: #fff; padding: 2px 12px;
                              border-radius: 4px; font-size: 11px; font-weight: bold; letter-spacing: 1px; }
+  .ai-copy-btn { position:absolute; top:-12px; right:16px; background:var(--orange); color:#fff;
+                 border:none; border-radius:4px; width:26px; height:24px; padding:0;
+                 display:inline-flex; align-items:center; justify-content:center;
+                 cursor:pointer; transition:opacity 0.15s, background 0.15s; }
+  .ai-copy-btn:hover { opacity:0.85; }
+  .ai-copy-btn svg { width:14px; height:14px; fill:#fff; }
+  .ai-copy-btn.copied { background:var(--green); }
 
   .loc-badges { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
   .loc-badge { padding:6px 16px; border-radius:20px; font-weight:bold; font-size:13px;
@@ -1162,7 +1169,12 @@ function showWeeklySummary() {
   const aiSummary = generateAISummary(tasks, daysSorted, locCounts, dateRange);
 
   let html = "";
-  if (aiSummary) html += '<div class="ai-summary-box">' + esc(aiSummary) + '</div>';
+  if (aiSummary) {
+    lastAISummary = aiSummary;
+    html += '<div class="ai-summary-box">'
+         + '<button class="ai-copy-btn" id="aiCopyBtn" onclick="copyAISummary()" title="Copy summary">' + COPY_ICON + '</button>'
+         + esc(aiSummary) + '</div>';
+  }
 
   html += '<div class="summary-stats">';
   html += statCard(tasks.length, "TOTAL TASKS");
@@ -1195,6 +1207,38 @@ function showWeeklySummary() {
 
   $("summaryBody").innerHTML = html;
   $("summaryModal").classList.add("open");
+}
+
+let lastAISummary = "";
+const COPY_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>';
+const CHECK_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+
+function copyAISummary() {
+  if (!lastAISummary) return;
+  const btn = $("aiCopyBtn");
+  const done = () => {
+    if (!btn) return;
+    btn.innerHTML = CHECK_ICON;
+    btn.classList.add("copied");
+    setTimeout(() => { btn.innerHTML = COPY_ICON; btn.classList.remove("copied"); }, 1800);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(lastAISummary).then(done).catch(() => fallbackCopy(lastAISummary, done));
+  } else {
+    fallbackCopy(lastAISummary, done);
+  }
+}
+
+function fallbackCopy(text, done) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand("copy"); done(); }
+  catch (e) { toast("Copy failed.", "error"); }
+  document.body.removeChild(ta);
 }
 
 function generateAISummary(tasks, daysSorted, locCounts, dateRange) {
