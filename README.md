@@ -30,6 +30,12 @@ Format: **vX.Y.Z**
 
 ## Version History
 
+### v0.4.1 (2026-04-17)
+**New Features:**
+- Version badge is now clickable and opens a scrollable Version History modal
+- Copy-to-clipboard icon on the weekly AI summary (top-right of the AI SUMMARY box)
+- Version badge label changed from Alpha to Beta
+
 ### v0.4.0 (2026-04-17)
 **New Features:**
 - Task Templates — save the current form (location, DC code, description, add. info) as a named preset; one-click load to refill the form

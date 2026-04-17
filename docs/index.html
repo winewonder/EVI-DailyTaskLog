@@ -713,7 +713,7 @@
 </div>
 
 <!-- Version Label -->
-<button type="button" class="version-label" onclick="openVersionHistory()" title="Click to view version history"><span class="alpha-badge">Beta</span> v0.4.0</button>
+<button type="button" class="version-label" onclick="openVersionHistory()" title="Click to view version history"><span class="alpha-badge">Beta</span> v0.4.1</button>
 
 <!-- Toast notification -->
 <div class="toast" id="toast"></div>
@@ -1518,14 +1518,17 @@ document.addEventListener("keydown", function(e) {
 // ══════════════════════════════════════════════════
 // Version History
 // ══════════════════════════════════════════════════
-const CURRENT_VERSION = "v0.4.0";
+const CURRENT_VERSION = "v0.4.1";
 const VERSION_HISTORY = [
+  { version: "v0.4.1", date: "2026-04-17", features: [
+      "Version badge is now clickable and opens a scrollable Version History modal",
+      "Copy-to-clipboard icon on the weekly AI summary (top-right of the AI SUMMARY box)",
+      "Version badge label changed from Alpha to Beta"
+  ]},
   { version: "v0.4.0", date: "2026-04-17", features: [
       "Task Templates — save the current form (location, DC code, description, add. info) as a named preset; one-click load to refill the form",
       "Bulk Entry — enter multiple descriptions (one per line) with shared date, location, DC code and add. info; creates N records in one save",
-      "Recurring Tasks — define daily or weekly (pick days) rules that auto-generate records from the start date onward; rules can be paused/resumed",
-      "Version History — clickable version badge opens full change log",
-      "Copy-to-clipboard icon on the weekly AI summary"
+      "Recurring Tasks — define daily or weekly (pick days) rules that auto-generate records from the start date onward; rules can be paused/resumed"
   ]},
   { version: "v0.3.0", date: "2026-04-15", features: [
       "Auto-complete suggestions for description field based on previous entries",
