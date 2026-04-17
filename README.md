@@ -30,6 +30,14 @@ Format: **vX.Y.Z**
 
 ## Version History
 
+### v0.5.0 (2026-04-17)
+**New Features:**
+- Attachments — insert images and PDFs into any task for more context
+- Files stored in IndexedDB (separate from task records) so storage scales to many MBs
+- Paperclip thumbnails in All Records table; click to open a full preview modal
+- Drag-and-drop or click to add files; 10MB per-file limit; PDFs shown via embedded viewer
+- Attachments follow edit/delete: removed with the task, editable from the edit modal
+
 ### v0.4.2 (2026-04-17)
 **New Features:**
 - Added two new themes: Rose (pink/magenta) and Teal (cyan/teal)

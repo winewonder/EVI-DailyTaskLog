@@ -389,6 +389,42 @@
   .freq-radios input[type="radio"]:checked + label { background:var(--blue); color:#fff; }
   .bulk-hint { font-size:11px; color:var(--text); opacity:0.6; margin:2px 0 8px 118px; }
 
+  /* Attachments */
+  .att-drop { border:2px dashed var(--input-border); border-radius:6px; padding:10px 14px;
+              background:var(--input-bg); color:var(--text); font-size:13px;
+              display:flex; align-items:center; gap:10px; flex-wrap:wrap; cursor:pointer; }
+  .att-drop:hover { border-color:var(--blue); }
+  .att-drop.dragover { border-color:var(--blue); background:var(--ltblue); }
+  .att-drop-hint { opacity:0.75; font-size:12px; }
+  .att-drop .att-add-btn { background:var(--blue); color:#fff; border:none; padding:4px 10px;
+                           border-radius:4px; font-size:12px; font-weight:bold; cursor:pointer; }
+  .att-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .att-chip { display:flex; align-items:center; gap:6px; background:var(--card-bg);
+              border:1px solid var(--input-border); border-radius:6px; padding:4px 6px;
+              font-size:12px; color:var(--text); max-width:240px; }
+  .att-chip img { width:40px; height:40px; object-fit:cover; border-radius:4px; display:block; }
+  .att-chip .att-icon { width:40px; height:40px; display:flex; align-items:center; justify-content:center;
+                        background:var(--ltblue); color:var(--navy); border-radius:4px; font-weight:bold; font-size:11px; }
+  .att-chip .att-meta { display:flex; flex-direction:column; min-width:0; }
+  .att-chip .att-name { font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:140px; }
+  .att-chip .att-size { opacity:0.7; font-size:10px; }
+  .att-chip .att-remove { background:transparent; border:none; color:var(--red); cursor:pointer;
+                          font-size:16px; padding:0 4px; line-height:1; font-weight:bold; }
+  .att-chip .att-remove:hover { color:#991b1b; }
+  .att-row-chips { display:flex; gap:4px; flex-wrap:wrap; align-items:center; }
+  .att-thumb { width:28px; height:28px; object-fit:cover; border-radius:3px; cursor:pointer;
+               border:1px solid var(--input-border); display:inline-block; vertical-align:middle; }
+  .att-thumb:hover { border-color:var(--blue); }
+  .att-badge { display:inline-flex; align-items:center; gap:3px; background:var(--ltblue);
+               color:var(--navy); border:1px solid var(--input-border); border-radius:3px;
+               padding:1px 5px; font-size:10px; font-weight:bold; cursor:pointer; }
+  .att-badge:hover { background:var(--blue); color:#fff; }
+  .att-preview-body { display:flex; align-items:center; justify-content:center; min-height:400px;
+                      max-height:70vh; overflow:auto; background:#f0f0f0; padding:10px; }
+  .att-preview-body img { max-width:100%; max-height:70vh; display:block; }
+  .att-preview-body iframe { width:100%; height:70vh; border:none; background:#fff; }
+  .att-preview-title { font-size:13px; font-weight:normal; opacity:0.85; }
+
   @media print {
     body * { visibility: hidden; }
     .modal, .modal * { visibility: visible; }
@@ -446,6 +482,17 @@
       <div class="form-row">
         <label>Add. Info</label>
         <textarea id="addInfo" rows="2" placeholder="Optional additional information..."></textarea>
+      </div>
+      <div class="form-row">
+        <label>Attachments</label>
+        <div style="flex:1;">
+          <div class="att-drop" id="attDrop" onclick="$('attFile').click()">
+            <button type="button" class="att-add-btn" onclick="event.stopPropagation(); $('attFile').click()">ADD FILES</button>
+            <span class="att-drop-hint">Click or drop images / PDFs here &mdash; max 10MB each</span>
+          </div>
+          <input type="file" id="attFile" multiple accept="image/*,application/pdf" style="display:none" onchange="onAttFiles(this, 'add')">
+          <div class="att-list" id="attList"></div>
+        </div>
       </div>
       <div class="btn-row">
         <button class="btn btn-save" onclick="saveEntry()">SAVE ENTRY <span class="kbd-hint"><kbd>Ctrl</kbd>+<kbd>S</kbd></span></button>
@@ -509,7 +556,7 @@
           <thead>
             <tr>
               <th>#</th><th>Date</th><th>Day</th><th>Description</th>
-              <th>Location</th><th>DC Code</th><th>Add. Info</th><th>Saved At</th><th>Actions</th>
+              <th>Location</th><th>DC Code</th><th>Add. Info</th><th>Files</th><th>Saved At</th><th>Actions</th>
             </tr>
           </thead>
           <tbody id="taskBody"></tbody>
@@ -585,6 +632,17 @@
       <div class="form-row">
         <label>Add. Info</label>
         <textarea id="editAddInfo" rows="2" placeholder="Optional additional information..."></textarea>
+      </div>
+      <div class="form-row">
+        <label>Attachments</label>
+        <div style="flex:1;">
+          <div class="att-drop" onclick="$('editAttFile').click()">
+            <button type="button" class="att-add-btn" onclick="event.stopPropagation(); $('editAttFile').click()">ADD FILES</button>
+            <span class="att-drop-hint">Click to add images / PDFs &mdash; max 10MB each</span>
+          </div>
+          <input type="file" id="editAttFile" multiple accept="image/*,application/pdf" style="display:none" onchange="onAttFiles(this, 'edit')">
+          <div class="att-list" id="editAttList"></div>
+        </div>
       </div>
     </div>
     <div class="modal-actions">
@@ -802,8 +860,23 @@
   </div>
 </div>
 
+<!-- Attachment Preview Modal -->
+<div class="modal-overlay" id="attPreviewModal">
+  <div class="modal" style="max-width:900px;">
+    <div class="modal-header">
+      <h2 id="attPreviewTitle">PREVIEW</h2>
+      <button class="modal-close" onclick="closeAttPreview()">&times;</button>
+    </div>
+    <div class="att-preview-body" id="attPreviewBody"></div>
+    <div class="modal-actions">
+      <a id="attPreviewDownload" class="btn btn-blue" download>DOWNLOAD</a>
+      <button class="btn btn-clear" onclick="closeAttPreview()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
 <!-- Version Label -->
-<button type="button" class="version-label" onclick="openVersionHistory()" title="Click to view version history"><span class="alpha-badge">Beta</span> v0.4.2</button>
+<button type="button" class="version-label" onclick="openVersionHistory()" title="Click to view version history"><span class="alpha-badge">Beta</span> v0.5.0</button>
 
 <!-- Toast notification -->
 <div class="toast" id="toast"></div>
@@ -922,6 +995,239 @@ function fetchTasksByMode(mode, params) {
 }
 
 // ══════════════════════════════════════════════════
+// IndexedDB Attachment Layer
+// ══════════════════════════════════════════════════
+const IDB_NAME = "evi_attachments_db";
+const IDB_VER = 1;
+const IDB_STORE = "attachments";
+const ATT_MAX_BYTES = 10 * 1024 * 1024; // 10MB/file
+let _idb = null;
+let attachmentsCache = []; // metadata only: {id, task_id, name, type, size, thumb, created_at}
+
+function idbOpen() {
+  if (_idb) return Promise.resolve(_idb);
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, IDB_VER);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        const store = db.createObjectStore(IDB_STORE, { keyPath: "id", autoIncrement: true });
+        store.createIndex("by_task", "task_id");
+      }
+    };
+    req.onsuccess = () => { _idb = req.result; resolve(_idb); };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function idbPut(record) {
+  return idbOpen().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, "readwrite");
+    const req = tx.objectStore(IDB_STORE).put(record);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  }));
+}
+
+function idbGet(id) {
+  return idbOpen().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, "readonly");
+    const req = tx.objectStore(IDB_STORE).get(id);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  }));
+}
+
+function idbGetAll() {
+  return idbOpen().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, "readonly");
+    const req = tx.objectStore(IDB_STORE).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  }));
+}
+
+function idbGetByTask(taskId) {
+  return idbOpen().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, "readonly");
+    const req = tx.objectStore(IDB_STORE).index("by_task").getAll(taskId);
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  }));
+}
+
+function idbDelete(id) {
+  return idbOpen().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, "readwrite");
+    const req = tx.objectStore(IDB_STORE).delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  }));
+}
+
+async function idbDeleteByTask(taskId) {
+  const list = await idbGetByTask(taskId);
+  await Promise.all(list.map(a => idbDelete(a.id)));
+}
+
+async function refreshAttachmentsCache() {
+  const all = await idbGetAll();
+  attachmentsCache = all.map(a => ({
+    id: a.id, task_id: a.task_id, name: a.name, type: a.type,
+    size: a.size, thumb: a.thumb, created_at: a.created_at,
+  }));
+}
+
+function getAttachmentsForTask(taskId) {
+  return attachmentsCache.filter(a => a.task_id === taskId);
+}
+
+function humanSize(bytes) {
+  if (bytes < 1024) return bytes + "B";
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(0) + "KB";
+  return (bytes/(1024*1024)).toFixed(1) + "MB";
+}
+
+function makeThumb(file) {
+  return new Promise(resolve => {
+    if (!file.type.startsWith("image/")) { resolve(null); return; }
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 120;
+      const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(img.width * scale));
+      canvas.height = Math.max(1, Math.round(img.height * scale));
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      try { resolve(canvas.toDataURL("image/jpeg", 0.7)); }
+      catch (e) { resolve(null); }
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+    img.src = url;
+  });
+}
+
+// Staged attachment buffers (before task is saved / while editing)
+let stagedAdd = [];   // new items for add form: {tempId, name, type, size, blob, thumb, isNew:true}
+let stagedEdit = [];  // for edit modal: mix of persisted {id, ...} + new {tempId, ..., isNew:true}
+
+async function onAttFiles(input, which) {
+  const files = Array.from(input.files || []);
+  for (const f of files) {
+    if (f.size > ATT_MAX_BYTES) { toast("File too large (max 10MB): " + f.name, "error"); continue; }
+    if (!/^image\//.test(f.type) && f.type !== "application/pdf") {
+      toast("Unsupported type: " + f.name, "error"); continue;
+    }
+    const thumb = await makeThumb(f);
+    const item = { tempId: Date.now() + "_" + Math.random().toString(36).slice(2,7),
+                   name: f.name, type: f.type, size: f.size, blob: f, thumb, isNew: true };
+    if (which === "add") stagedAdd.push(item); else stagedEdit.push(item);
+  }
+  input.value = "";
+  renderStagedList(which);
+}
+
+function renderStagedList(which) {
+  const listId = which === "add" ? "attList" : "editAttList";
+  const list = $(listId);
+  if (!list) return;
+  const items = which === "add" ? stagedAdd : stagedEdit;
+  if (!items.length) { list.innerHTML = ""; return; }
+  list.innerHTML = items.map(a => {
+    const key = a.isNew ? ("temp:" + a.tempId) : ("id:" + a.id);
+    const isImg = a.type && a.type.startsWith("image/");
+    const visual = isImg && a.thumb
+      ? `<img src="${a.thumb}" alt="">`
+      : `<div class="att-icon">${a.type === "application/pdf" ? "PDF" : "FILE"}</div>`;
+    return `<div class="att-chip">
+      ${visual}
+      <div class="att-meta">
+        <span class="att-name" title="${esc(a.name)}">${esc(a.name)}</span>
+        <span class="att-size">${humanSize(a.size)}</span>
+      </div>
+      <button type="button" class="att-remove" title="Remove" onclick="removeStaged('${which}','${key}')">&times;</button>
+    </div>`;
+  }).join("");
+}
+
+function removeStaged(which, key) {
+  const arr = which === "add" ? stagedAdd : stagedEdit;
+  const [kind, raw] = key.split(":");
+  const idx = arr.findIndex(a => (kind === "temp" ? a.tempId === raw : String(a.id) === raw));
+  if (idx !== -1) arr.splice(idx, 1);
+  renderStagedList(which);
+}
+
+async function persistStaged(taskId, staged) {
+  for (const s of staged) {
+    if (!s.isNew) continue; // existing persisted items stay as-is
+    await idbPut({
+      task_id: taskId, name: s.name, type: s.type, size: s.size,
+      blob: s.blob, thumb: s.thumb,
+      created_at: new Date().toISOString(),
+    });
+  }
+}
+
+async function reconcileEditAttachments(taskId) {
+  // Compare current DB state for task against stagedEdit. Delete removed ones, insert new ones.
+  const existing = await idbGetByTask(taskId);
+  const keptIds = new Set(stagedEdit.filter(s => !s.isNew).map(s => s.id));
+  for (const e of existing) {
+    if (!keptIds.has(e.id)) await idbDelete(e.id);
+  }
+  await persistStaged(taskId, stagedEdit);
+}
+
+// ── Attachment preview modal ──────────────────────────
+async function openAttPreview(attId) {
+  const rec = await idbGet(attId);
+  if (!rec) { toast("Attachment not found.", "error"); return; }
+  const body = $("attPreviewBody");
+  const url = URL.createObjectURL(rec.blob);
+  body.dataset.url = url;
+  body.innerHTML = "";
+  if (rec.type.startsWith("image/")) {
+    const img = document.createElement("img");
+    img.src = url; img.alt = rec.name;
+    body.appendChild(img);
+  } else if (rec.type === "application/pdf") {
+    const iframe = document.createElement("iframe");
+    iframe.src = url;
+    body.appendChild(iframe);
+  } else {
+    body.textContent = "Preview not supported for this file type.";
+  }
+  $("attPreviewTitle").innerHTML = esc(rec.name) + ' <span class="att-preview-title">(' + humanSize(rec.size) + ')</span>';
+  const dl = $("attPreviewDownload");
+  dl.href = url;
+  dl.download = rec.name;
+  $("attPreviewModal").classList.add("open");
+}
+
+function closeAttPreview() {
+  const body = $("attPreviewBody");
+  if (body.dataset.url) { URL.revokeObjectURL(body.dataset.url); body.dataset.url = ""; }
+  body.innerHTML = "";
+  $("attPreviewModal").classList.remove("open");
+}
+
+function renderAttCell(taskId) {
+  const atts = getAttachmentsForTask(taskId);
+  if (!atts.length) return "";
+  const MAX_SHOW = 3;
+  const shown = atts.slice(0, MAX_SHOW).map(a => {
+    if (a.thumb) return `<img class="att-thumb" src="${a.thumb}" title="${esc(a.name)}" onclick="openAttPreview(${a.id})">`;
+    const label = a.type === "application/pdf" ? "PDF" : "FILE";
+    return `<span class="att-badge" title="${esc(a.name)}" onclick="openAttPreview(${a.id})">${label}</span>`;
+  }).join("");
+  const more = atts.length > MAX_SHOW ? `<span class="att-badge" title="${atts.length} files">+${atts.length - MAX_SHOW}</span>` : "";
+  return `<div class="att-row-chips">${shown}${more}</div>`;
+}
+
+// ══════════════════════════════════════════════════
 // UI Logic (same as Flask version)
 // ══════════════════════════════════════════════════
 let activeTab = "all";
@@ -936,17 +1242,17 @@ function init() {
   $("yearNum").value = today.getFullYear();
   $("entryDate").addEventListener("change", () => updateDateDisplay($("entryDate").value));
 
-  // Load records from data.json and merge into localStorage
-  fetch("data.json").then(r => r.json()).then(data => {
+  // Load records from data.json + attachments cache from IndexedDB
+  const boot = async () => {
+    try { await refreshAttachmentsCache(); } catch (e) {}
+    processRecurringTasks();
+    recallAll();
+    updateStats();
+  };
+  fetch("data.json").then(r => r.json()).then(async data => {
     if (data.tasks && data.tasks.length) mergeRemoteTasks(data.tasks);
-    processRecurringTasks();
-    recallAll();
-    updateStats();
-  }).catch(() => {
-    processRecurringTasks();
-    recallAll();
-    updateStats();
-  });
+    await boot();
+  }).catch(() => { boot(); });
 }
 
 function updateDateDisplay(isoStr) {
@@ -995,14 +1301,21 @@ setupOtherToggle("bulkLocation", "bulkLocOther");
 setupOtherToggle("ruleLocation", "ruleLocOther");
 
 // ── Save ──────────────────────────────────────────
-function saveEntry() {
+async function saveEntry() {
   const desc = $("description").value.trim();
   if (!desc) { toast("Please enter a task description.", "error"); $("description").focus(); return; }
   const rowId = addTask(
     $("entryDate").value, desc, getLocation(),
     $("dcCode").value.trim() || "EVI01", $("addInfo").value.trim()
   );
-  toast("Entry #" + rowId + " saved successfully!", "success");
+  if (stagedAdd.length) {
+    await persistStaged(rowId, stagedAdd);
+    await refreshAttachmentsCache();
+  }
+  const n = stagedAdd.length;
+  stagedAdd = [];
+  renderStagedList("add");
+  toast("Entry #" + rowId + " saved" + (n ? " with " + n + " file(s)" : "") + "!", "success");
   setStatus("SAVED  Record #" + rowId);
   clearForm();
   refreshActiveTab();
@@ -1051,13 +1364,16 @@ function clearForm() {
   const today = localDateStr();
   $("entryDate").value = today;
   updateDateDisplay(today);
+  stagedAdd = [];
+  renderStagedList("add");
   setStatus("Form cleared — ready for new entry.");
 }
 
 // ── Delete ────────────────────────────────────────
-function deleteRecord(id) {
+async function deleteRecord(id) {
   if (!confirm("Delete record #" + id + "?\nThis cannot be undone.")) return;
   deleteTask(id);
+  try { await idbDeleteByTask(id); await refreshAttachmentsCache(); } catch (e) {}
   toast("Record #" + id + " deleted.", "success");
   refreshActiveTab();
 }
@@ -1083,15 +1399,21 @@ function editRecord(id) {
     $("editLocOther").value = loc;
   }
   $("editTitle").textContent = "EDIT RECORD #" + r.id;
+  // Load existing attachments into edit buffer (metadata only; blob fetched on preview)
+  stagedEdit = getAttachmentsForTask(r.id).map(a => ({
+    id: a.id, name: a.name, type: a.type, size: a.size, thumb: a.thumb, isNew: false,
+  }));
+  renderStagedList("edit");
   $("editModal").classList.add("open");
 }
 
-function submitEdit() {
+async function submitEdit() {
   const id = parseInt($("editId").value);
   const desc = $("editDescription").value.trim();
   if (!desc) { toast("Description is required.", "error"); $("editDescription").focus(); return; }
   updateTask(id, $("editDate").value, desc, getEditLocation(),
              $("editDcCode").value.trim() || "EVI01", $("editAddInfo").value.trim());
+  try { await reconcileEditAttachments(id); await refreshAttachmentsCache(); } catch (e) {}
   toast("Record #" + id + " updated successfully!", "success");
   closeEdit();
   refreshActiveTab();
@@ -1138,6 +1460,7 @@ function renderTable(rows) {
       <td class="center">${r.location||""}</td>
       <td class="center">${r.dc_code||"EVI01"}</td>
       <td class="info-col">${linkify(r.add_info||"")}</td>
+      <td class="center">${renderAttCell(r.id)}</td>
       <td class="center">${r.saved_at||""}</td>
       <td class="actions">
         <button class="act-btn act-dup" onclick="dupRecord(${r.id})">DUP</button>
@@ -1226,6 +1549,8 @@ function loadCurrentWeek() {
       html += '<span class="day-card-loc">' + esc(t.location||"") + '</span>';
       html += '<span class="day-card-desc">' + linkify(t.description||"") + '</span>';
       if (t.add_info) html += '<span class="day-card-info">' + linkify(t.add_info) + '</span>';
+      const attHtml = renderAttCell(t.id);
+      if (attHtml) html += '<span class="day-card-info">' + attHtml + '</span>';
       html += '<span class="day-card-actions">'
             + '<button class="act-btn act-edit" onclick="editRecord(' + t.id + ')">EDIT</button>'
             + '<button class="act-btn act-del" onclick="deleteRecord(' + t.id + ')">DEL</button>'
@@ -1585,7 +1910,8 @@ document.addEventListener("keydown", function(e) {
     else saveEntry();
   }
   if (e.key === "Escape") {
-    if ($("editModal").classList.contains("open")) closeEdit();
+    if ($("attPreviewModal").classList.contains("open")) closeAttPreview();
+    else if ($("editModal").classList.contains("open")) closeEdit();
     else if ($("summaryModal").classList.contains("open")) closeSummary();
     else if ($("templatesModal").classList.contains("open")) closeTemplates();
     else if ($("bulkModal").classList.contains("open")) closeBulk();
@@ -1609,8 +1935,15 @@ document.addEventListener("keydown", function(e) {
 // ══════════════════════════════════════════════════
 // Version History
 // ══════════════════════════════════════════════════
-const CURRENT_VERSION = "v0.4.2";
+const CURRENT_VERSION = "v0.5.0";
 const VERSION_HISTORY = [
+  { version: "v0.5.0", date: "2026-04-17", features: [
+      "Attachments — insert images and PDFs into any task for more context",
+      "Files stored in IndexedDB (separate from task records) so storage scales to many MBs",
+      "Paperclip thumbnails in All Records table; click to open a full preview modal",
+      "Drag-and-drop or click to add files; 10MB per-file limit; PDFs shown via embedded viewer",
+      "Attachments follow edit/delete: removed with the task, editable from the edit modal"
+  ]},
   { version: "v0.4.2", date: "2026-04-17", features: [
       "Added two new themes: Rose (pink/magenta) and Teal (cyan/teal)",
       "Settings modal now shows 8 theme tiles"
@@ -2041,7 +2374,26 @@ document.addEventListener("click", function(e) {
   if (e.target.id === "recurringModal") closeRecurring();
   if (e.target.id === "versionModal") closeVersionHistory();
   if (e.target.id === "settingsModal") closeSettings();
+  if (e.target.id === "attPreviewModal") closeAttPreview();
 });
+
+// Drag-drop on main form attachment zone
+(function() {
+  const drop = document.getElementById("attDrop");
+  if (!drop) return;
+  ["dragenter","dragover"].forEach(ev => drop.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation(); drop.classList.add("dragover");
+  }));
+  ["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation(); drop.classList.remove("dragover");
+  }));
+  drop.addEventListener("drop", e => {
+    const dt = e.dataTransfer;
+    if (!dt || !dt.files || !dt.files.length) return;
+    const fake = { files: dt.files, value: "" };
+    onAttFiles(fake, "add");
+  });
+})();
 
 init();
 </script>
